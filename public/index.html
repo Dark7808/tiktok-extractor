@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikTok Extractor</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Tahoma,sans-serif; }
+  body { background:linear-gradient(135deg,#0f0f1a,#1a1a2e); min-height:100vh; color:#fff; padding:16px; display:flex; justify-content:center; }
+  .container { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:22px; max-width:920px; width:100%; margin-top:16px; }
+  h1 { font-size:1.6rem; text-align:center; background:linear-gradient(90deg,#ff0050,#00f2ea); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+  .subtitle { text-align:center; color:#888; font-size:.82rem; margin-bottom:20px; }
+  .input-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  input[type=text] { flex:1; min-width:180px; padding:13px 15px; border:2px solid rgba(255,255,255,.1); border-radius:12px; background:rgba(255,255,255,.05); color:#fff; font-size:.95rem; outline:none; }
+  input[type=text]:focus { border-color:#00f2ea; }
+  input[type=text]::placeholder { color:#666; }
+  button { border:none; border-radius:12px; padding:13px 18px; font-size:.95rem; font-weight:600; cursor:pointer; }
+  .btn-primary { background:linear-gradient(135deg,#ff0050,#ff4081); color:#fff; }
+  .btn-primary:disabled { opacity:.5; }
+  .btn-voice { background:rgba(0,242,234,.15); color:#00f2ea; border:1px solid rgba(0,242,234,.3); padding:13px 13px; }
+  .btn-voice.listening { background:rgba(255,0,80,.2); color:#ff4081; }
+  .lang-select { background:rgba(255,255,255,.05); color:#fff; border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:0 8px; font-size:.82rem; }
+  .lang-select option { background:#1a1a2e; }
+  .loading { text-align:center; padding:14px; color:#00f2ea; display:none; }
+  .loading.active { display:block; }
+  .spinner { display:inline-block; width:16px; height:16px; border:3px solid rgba(0,242,234,.3); border-top-color:#00f2ea; border-radius:50%; animation:spin .8s linear infinite; margin-right:8px; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .error { background:rgba(255,0,80,.1); border:1px solid rgba(255,0,80,.3); border-radius:12px; padding:12px 16px; color:#ff6b6b; margin-bottom:14px; display:none; }
+  .error.active { display:block; }
+  .results { display:none; }
+  .results.active { display:block; }
+  .card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:16px; margin-bottom:12px; }
+  .card h2 { font-size:.95rem; color:#00f2ea; margin-bottom:12px; }
+  .field { margin-bottom:11px; }
+  .field label { display:block; font-size:.7rem; color:#888; text-transform:uppercase; margin-bottom:4px; }
+  .value-box { background:rgba(0,0,0,.3); border-radius:8px; padding:9px 12px; font-family:'Courier New',monospace; font-size:.82rem; word-break:break-all; color:#eee; }
+  .copy-btn { margin-top:5px; padding:5px 11px; font-size:.7rem; border-radius:6px; background:rgba(0,242,234,.12); color:#00f2ea; border:1px solid rgba(0,242,234,.25); cursor:pointer; }
+  .thumb-preview { max-width:220px; border-radius:10px; margin-top:8px; display:none; }
+  .embed-preview { background:#000; border-radius:10px; padding:14px; margin-top:8px; overflow-x:auto; }
+  .badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:.7rem; margin-left:6px; }
+  .badge-rapid { background:rgba(0,242,234,.15); color:#00f2ea; }
+  .badge-scrape { background:rgba(255,193,7,.15); color:#ffc107; }
+  .badge-oembed { background:rgba(255,255,255,.1); color:#aaa; }
+  @media (max-width:600px){ .input-row { flex-direction:column; } h1 { font-size:1.3rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>ЁЯО╡ TikTok Extractor</h1>
+  <p class="subtitle">ржнрж┐ржбрж┐ржУ рж▓рж┐ржВржХ ржкрзЗрж╕рзНржЯ ржХрж░рзБржи ржмрж╛ ржнржпрж╝рзЗрж╕рзЗ ржмрж▓рзБржи</p>
+  <div class="input-row">
+    <input id="urlInput" type="text" placeholder="https://www.tiktok.com/@username/video/1234567890" />
+    <select id="voiceLang" class="lang-select">
+      <option value="bn-BD">ржмрж╛ржВрж▓рж╛</option>
+      <option value="en-US">English</option>
+      <option value="hi-IN">рд╣рд┐рдиреНрджреА</option>
+    </select>
+    <button class="btn-voice" id="voiceBtn" onclick="toggleVoice()">ЁЯОд</button>
+    <button class="btn-primary" id="extractBtn" onclick="extract()">ржмрзЗрж░ ржХрж░рзБржи</button>
+  </div>
+  <div class="loading" id="loading"><span class="spinner"></span> ржбрзЗржЯрж╛ ржмрзЗрж░ ржХрж░рж╛ рж╣ржЪрзНржЫрзЗ...</div>
+  <div class="error" id="error"></div>
+  <div class="results" id="results">
+    <div class="card">
+      <h2>ЁЯСд ржЗржЙржЬрж╛рж░ рждржерзНржп <span id="r-badge"></span></h2>
+      <div class="field"><label>ржЗржЙржЬрж╛рж░ржирзЗржо</label><div class="value-box" id="r-username">-</div></div>
+      <div class="field"><label>ржЗржЙржЬрж╛рж░ ID</label><div class="value-box" id="r-userid">-</div><button class="copy-btn" onclick="copyValue('r-userid')">ЁЯУЛ ржХржкрж┐</button></div>
+      <div class="field"><label>sec_uid</label><div class="value-box" id="r-secuid">-</div><button class="copy-btn" onclick="copyValue('r-secuid')">ЁЯУЛ ржХржкрж┐</button></div>
+      <div class="field"><label>ржирж┐ржХржирзЗржо</label><div class="value-box" id="r-nickname">-</div></div>
+      <div class="field"><label>ржлрж▓рзЛржпрж╝рж╛рж░</label><div class="value-box" id="r-followers">-</div></div>
+    </div>
+    <div class="card">
+      <h2>ЁЯОм ржнрж┐ржбрж┐ржУ рждржерзНржп</h2>
+      <div class="field"><label>ржнрж┐ржбрж┐ржУ ID</label><div class="value-box" id="r-videoid">-</div><button class="copy-btn" onclick="copyValue('r-videoid')">ЁЯУЛ ржХржкрж┐</button></div>
+      <div class="field"><label>ржЯрж╛ржЗржЯрзЗрж▓</label><div class="value-box" id="r-title">-</div></div>
+      <div class="field"><label>ржерж╛ржорзНржмржирзЗржЗрж▓ URL</label><div class="value-box" id="r-thumb">-</div><button class="copy-btn" onclick="copyValue('r-thumb')">ЁЯУЛ ржХржкрж┐</button><img id="thumbPreview" class="thumb-preview" onerror="this.style.display='none'" /></div>
+    </div>
+    <div class="card">
+      <h2>ЁЯФЧ ржПржорзНржмрзЗржб ржХрзЛржб</h2>
+      <div class="field"><label>HTML ржПржорзНржмрзЗржб</label><div class="value-box" id="r-embed" style="white-space:pre-wrap; font-size:.75rem;">-</div><button class="copy-btn" onclick="copyValue('r-embed')">ЁЯУЛ ржХржкрж┐</button></div>
+      <div class="embed-preview" id="embedPreview"></div>
+    </div>
+  </div>
+</div>
+<script>
+  let recognition = null;
+  let isListening = false;
+  function initVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const rec = new SR();
+    rec.interimResults = false; rec.maxAlternatives = 1; rec.continuous = false;
+    rec.onresult = (e) => {
+      const text = e.results[0][0].transcript.trim();
+      const urlMatch = text.match(/https?:\/\/[^\s]+/);
+      document.getElementById('urlInput').value = urlMatch ? urlMatch[0] : text;
+    };
+    rec.onerror = () => stopVoice();
+    rec.onend = () => stopVoice();
+    return rec;
+  }
+  function toggleVoice() {
+    if (isListening) { stopVoice(); return; }
+    if (!recognition) recognition = initVoice();
+    if (!recognition) { showError('ржнржпрж╝рзЗрж╕ рж╕рж╛ржкрзЛрж░рзНржЯ ржирзЗржЗред Chrome ржмрзНржпржмрж╣рж╛рж░ ржХрж░рзБржиред'); return; }
+    recognition.lang = document.getElementById('voiceLang').value;
+    try {
+      recognition.start(); isListening = true;
+      document.getElementById('voiceBtn').classList.add('listening');
+      document.getElementById('voiceBtn').textContent = 'ЁЯФ┤';
+    } catch (e) { showError('ржнржпрж╝рзЗрж╕ ржЪрж╛рж▓рзБ ржХрж░рж╛ ржпрж╛ржпрж╝ржирж┐'); }
+  }
+  function stopVoice() {
+    isListening = false;
+    document.getElementById('voiceBtn').classList.remove('listening');
+    document.getElementById('voiceBtn').textContent = 'ЁЯОд';
+  }
+  async function extract() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) { showError('TikTok рж▓рж┐ржВржХ ржжрж┐ржи'); return; }
+    hideError();
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('loading').classList.add('active');
+    document.getElementById('extractBtn').disabled = true;
+    try {
+      const res = await fetch('/api/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || 'ржбрзЗржЯрж╛ ржмрзЗрж░ ржХрж░рж╛ ржпрж╛ржпрж╝ржирж┐');
+      displayResults(result.data);
+    } catch (e) { showError(e.message || 'ржХрж┐ржЫрзБ ржнрзБрж▓ рж╣ржпрж╝рзЗржЫрзЗ'); }
+    finally {
+      document.getElementById('loading').classList.remove('active');
+      document.getElementById('extractBtn').disabled = false;
+    }
+  }
+  function displayResults(d) {
+    set('r-username', d.username || '-');
+    set('r-userid', d.userId || 'ржкрж╛ржУржпрж╝рж╛ ржпрж╛ржпрж╝ржирж┐');
+    set('r-secuid', d.secUid || 'ржкрж╛ржУржпрж╝рж╛ ржпрж╛ржпрж╝ржирж┐');
+    set('r-nickname', d.nickname || '-');
+    set('r-followers', d.followerCount != null ? d.followerCount.toLocaleString('bn-BD') : 'ржкрж╛ржУржпрж╝рж╛ ржпрж╛ржпрж╝ржирж┐');
+    set('r-videoid', d.videoId || '-');
+    set('r-title', d.title || '-');
+    set('r-thumb', d.thumbnailUrl || 'ржкрж╛ржУржпрж╝рж╛ ржпрж╛ржпрж╝ржирж┐');
+    set('r-embed', d.embedHtml || 'ржкрж╛ржУржпрж╝рж╛ ржпрж╛ржпрж╝ржирж┐');
+    const badge = document.getElementById('r-badge');
+    if (d.source === 'rapidapi') badge.innerHTML = '<span class="badge badge-rapid">RapidAPI</span>';
+    else if (d.source === 'scraping') badge.innerHTML = '<span class="badge badge-scrape">Scraping</span>';
+    else badge.innerHTML = '<span class="badge badge-oembed">oEmbed</span>';
+    const thumb = document.getElementById('thumbPreview');
+    if (d.thumbnailUrl) { thumb.src = d.thumbnailUrl; thumb.style.display = 'block'; }
+    else thumb.style.display = 'none';
+    const box = document.getElementById('embedPreview');
+    if (d.embedHtml) {
+      box.innerHTML = d.embedHtml;
+      if (!document.querySelector('script[src="https://www.tiktok.com/embed.js"]')) {
+        const s = document.createElement('script');
+        s.src = 'https://www.tiktok.com/embed.js';
+        s.async = true;
+        document.body.appendChild(s);
+      }
+    } else box.innerHTML = '<p style="color:#666;">ржПржорзНржмрзЗржб ржХрзЛржб ржирзЗржЗ</p>';
+    document.getElementById('results').classList.add('active');
+  }
+  function set(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+  async function copyValue(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    try {
+      await navigator.clipboard.writeText(el.textContent);
+      const btn = el.parentElement.querySelector('.copy-btn');
+      if (btn) { const o = btn.textContent; btn.textContent = 'тЬЕ'; setTimeout(() => btn.textContent = o, 1500); }
+    } catch { showError('ржХржкрж┐ ржХрж░рж╛ ржпрж╛ржпрж╝ржирж┐'); }
+  }
+  function showError(m) { const el = document.getElementById('error'); el.textContent = 'тЭМ ' + m; el.classList.add('active'); }
+  function hideError() { document.getElementById('error').classList.remove('active'); }
+  document.getElementById('urlInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') extract(); });
+</script>
+</body>
+</html>
