@@ -30,14 +30,13 @@ button{border:none;border-radius:8px;padding:12px 16px;font-size:.88rem;font-wei
 pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-family:monospace;font-size:.78rem;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#ddd;max-height:500px;overflow-y:auto}
 .fmt{background:#000;border-radius:8px;padding:12px;font-family:monospace;font-size:.78rem;color:#aaa;line-height:1.7;margin-bottom:12px}
 .fmt b{color:#00f2ea}
-.tag{display:inline-block;background:#4caf50;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:10px;margin-left:8px}
 .hint{font-size:.72rem;color:#666;margin-top:5px}
 </style>
 </head>
 <body>
 
 <div class="hd">
-  <h1>📦 Bulk Import <span class="tag">Auto</span></h1>
+  <h1>📦 Bulk Import <span style="background:#4caf50;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:10px;margin-left:8px">FREE</span></h1>
   <a href="/">← Dashboard</a>
 </div>
 
@@ -95,30 +94,47 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
   function extractId(url){
     var m = url.match(/\/video\/(\d+)/);
     if (m) return m[1];
-    var m2 = url.match(/\/v\/(\d+)/);
-    return m2 ? m2[1] : '';
+    return '';
   }
 
-  function callServer(url){
-    return fetch('/api/extract', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: url })
-    }).then(function(r){
-      return r.json().then(function(j){
-        if (!r.ok || !j.success) throw new Error(j.error || ('এরর ' + r.status));
-        return j.data;
-      });
+  // tikwm.com API দিয়ে ডেটা আনা
+  async function fetchTikwm(url) {
+    var api = 'https://www.tikwm.com/api/?url=' + encodeURIComponent(url);
+    
+    var res = await fetch(api, {
+      method: 'GET'
     });
+    
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    
+    var j = await res.json();
+    
+    if (!j || j.code !== 0 || !j.data) {
+      throw new Error(j && j.msg ? j.msg : 'ডেটা নেই');
+    }
+    
+    return j.data;
   }
 
-  function processOne(url){
-    return callServer(url).catch(function(e){
-      return { error: e.message || 'ব্যর্থ' };
-    });
+  async function processOne(url) {
+    try {
+      var d = await fetchTikwm(url);
+      var title = (d.title || '').replace(/\s+/g, ' ').trim();
+      if (!title) title = 'Untitled';
+      if (title.length > 100) title = title.slice(0, 100).trim();
+      
+      return {
+        ok: true,
+        title: title,
+        id: String(d.id || extractId(url) || ''),
+        thumb: d.cover || d.origin_cover || d.dynamic_cover || ''
+      };
+    } catch(e) {
+      return { ok: false, error: e.message || 'ব্যর্থ' };
+    }
   }
 
-  window.run = function(){
+  window.run = async function(){
     var raw = ($inp.value || '').trim();
     if (!raw) { alert('⚠️ অনুগ্রহ করে কিছু TikTok লিংক দিন'); return; }
 
@@ -136,34 +152,29 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
     $res.textContent = '';
     $fl.style.width = '0%';
 
-    var i = 0;
-    function next(){
-      if (i >= lines.length) {
-        $res.textContent = out.join('\n');
-        $st.classList.remove('show');
-        $go.disabled = false;
-        $out.classList.add('show');
-        $fl.style.width = '100%';
-        try { $out.scrollIntoView({ behavior:'smooth', block:'start' }); } catch(e){}
-        return;
-      }
+    for (var i = 0; i < lines.length; i++) {
       var url = lines[i];
-      $fl.style.width = Math.round((i / lines.length) * 100) + '%';
+      $fl.style.width = Math.round(((i+1) / lines.length) * 100) + '%';
       $stx.textContent = 'প্রসেস হচ্ছে ' + (i+1) + '/' + lines.length + '...';
 
-      processOne(url).then(function(r){
-        if (r && r.error) {
-          out.push('ERROR | ' + url + ' | ' + cat + ' | ' + r.error);
-        } else {
-          var id = r.videoId || extractId(url);
-          out.push((r.title || 'Untitled') + ' | ' + id + ' | ' + cat + ' | ' + (r.thumbnailUrl || ''));
-        }
-        i++;
-        if (i < lines.length) sleep(200).then(next);
-        else next();
-      });
+      var r = await processOne(url);
+      
+      if (r.ok) {
+        out.push(r.title + ' | ' + r.id + ' | ' + cat + ' | ' + r.thumb);
+      } else {
+        out.push('ERROR | ' + url + ' | ' + cat + ' | ' + r.error);
+      }
+      
+      // একটা একটা করে, তাই দেরি
+      await sleep(500);
     }
-    next();
+
+    $res.textContent = out.join('\n');
+    $st.classList.remove('show');
+    $go.disabled = false;
+    $out.classList.add('show');
+    $fl.style.width = '100%';
+    try { $out.scrollIntoView({ behavior:'smooth', block:'start' }); } catch(e){}
   };
 
   window.clearAll = function(){
