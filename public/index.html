@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bulk Import - ViralVideos</title>
+<title>Bulk Import</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
 body{background:#0a0a0a;min-height:100vh;color:#fff;padding:14px}
 .hd{max-width:900px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:center;padding:10px 0}
 .hd h1{color:#ff3366;font-size:1.3rem}
-.hd a{color:#888;text-decoration:none;font-size:.82rem;padding:8px 12px;border:1px solid #333;border-radius:8px}
 .box{background:#141414;border:1px solid #222;border-radius:14px;padding:18px;max-width:900px;margin:0 auto 14px}
 .box h2{color:#ff3366;font-size:1rem;margin-bottom:12px}
 label{display:block;font-size:.75rem;color:#ffc107;margin-bottom:5px;font-weight:600}
@@ -36,8 +35,7 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
 <body>
 
 <div class="hd">
-  <h1>📦 Bulk Import <span style="background:#4caf50;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:10px;margin-left:8px">FREE</span></h1>
-  <a href="/">← Dashboard</a>
+  <h1>📦 Bulk Import</h1>
 </div>
 
 <div class="box">
@@ -49,8 +47,7 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
 
   <label>📥 TikTok লিংকগুলো (প্রতি লাইনে একটি)</label>
   <textarea id="inp" placeholder="https://vt.tiktok.com/ZSbkNHyWs/
-https://vt.tiktok.com/ZSbkNUXgA/
-https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
+https://vt.tiktok.com/ZSbkNUXgA/"></textarea>
   <div class="hint">💡 Short link (vt.tiktok.com) সাপোর্ট করে।</div>
 
   <label style="margin-top:12px">Default Category (ঐচ্ছিক)</label>
@@ -68,7 +65,7 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
 </div>
 
 <div class="box out" id="out">
-  <h2>📤 আউটপুট: Title | TikTok ID | Category | Thumbnail URL</h2>
+  <h2>📤 আউটপুট</h2>
   <pre id="res"></pre>
   <div class="btn-row">
     <button class="b-alt" onclick="copyAll()">📋 Copy All</button>
@@ -93,41 +90,36 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
 
   function extractId(url){
     var m = url.match(/\/video\/(\d+)/);
-    if (m) return m[1];
-    return '';
+    return m ? m[1] : '';
   }
 
-  // tikwm.com API দিয়ে ডেটা আনা
-  async function fetchTikwm(url) {
-    var api = 'https://www.tikwm.com/api/?url=' + encodeURIComponent(url);
-    
-    var res = await fetch(api, {
-      method: 'GET'
+  // Netlify Function-এ কল (server-side tikwm.com কল করে)
+  async function callServer(url) {
+    var res = await fetch('/api/extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url })
     });
-    
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    
-    var j = await res.json();
-    
-    if (!j || j.code !== 0 || !j.data) {
-      throw new Error(j && j.msg ? j.msg : 'ডেটা নেই');
+
+    var j;
+    try { j = await res.json(); }
+    catch(e) { throw new Error('Invalid response'); }
+
+    if (!res.ok || !j.success) {
+      throw new Error(j.error || ('এরর ' + res.status));
     }
-    
+
     return j.data;
   }
 
   async function processOne(url) {
     try {
-      var d = await fetchTikwm(url);
-      var title = (d.title || '').replace(/\s+/g, ' ').trim();
-      if (!title) title = 'Untitled';
-      if (title.length > 100) title = title.slice(0, 100).trim();
-      
+      var d = await callServer(url);
       return {
         ok: true,
-        title: title,
-        id: String(d.id || extractId(url) || ''),
-        thumb: d.cover || d.origin_cover || d.dynamic_cover || ''
+        title: d.title || 'Untitled',
+        id: d.videoId || extractId(url),
+        thumb: d.thumbnailUrl || ''
       };
     } catch(e) {
       return { ok: false, error: e.message || 'ব্যর্থ' };
@@ -158,15 +150,17 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
       $stx.textContent = 'প্রসেস হচ্ছে ' + (i+1) + '/' + lines.length + '...';
 
       var r = await processOne(url);
-      
+
       if (r.ok) {
         out.push(r.title + ' | ' + r.id + ' | ' + cat + ' | ' + r.thumb);
       } else {
         out.push('ERROR | ' + url + ' | ' + cat + ' | ' + r.error);
       }
-      
-      // একটা একটা করে, তাই দেরি
-      await sleep(500);
+
+      // রেট লিমিট এড়াতে ছোট বিরতি
+      if (i < lines.length - 1) {
+        await sleep(500);
+      }
     }
 
     $res.textContent = out.join('\n');
@@ -188,17 +182,16 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
     var t = $res.textContent || '';
     if (!t) { alert('কিছু নেই'); return; }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(t).then(function(){ alert('✅ Copy হয়েছে'); }).catch(function(){ fallbackCopy(t); });
-    } else fallbackCopy(t);
+      navigator.clipboard.writeText(t).then(function(){ alert('✅ Copy হয়েছে'); }).catch(function(){ fbCopy(t); });
+    } else fbCopy(t);
   };
 
-  function fallbackCopy(text){
+  function fbCopy(text){
     try {
       var ta = document.createElement('textarea');
       ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
+      document.execCommand('copy'); document.body.removeChild(ta);
       alert('✅ Copy হয়েছে');
     } catch(e){ alert('❌ Copy ব্যর্থ'); }
   }
@@ -211,8 +204,7 @@ https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
       var u = URL.createObjectURL(b);
       var a = document.createElement('a');
       a.href = u; a.download = 'bulk-output-' + Date.now() + '.txt';
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function(){ URL.revokeObjectURL(u); }, 1000);
     } catch(e){ alert('❌ Download ব্যর্থ'); }
   };
