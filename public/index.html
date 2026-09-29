@@ -3,190 +3,321 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TikTok Extractor</title>
+<title>Bulk Import - ViralVideos</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Tahoma,sans-serif; }
-body { background:linear-gradient(135deg,#0f0f1a,#1a1a2e); min-height:100vh; color:#fff; padding:16px; display:flex; justify-content:center; }
-.container { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:22px; max-width:920px; width:100%; margin-top:16px; }
-h1 { font-size:1.6rem; text-align:center; background:linear-gradient(90deg,#ff0050,#00f2ea); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
-.subtitle { text-align:center; color:#888; font-size:.82rem; margin-bottom:20px; }
-.input-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-input[type=text] { flex:1; min-width:180px; padding:13px 15px; border:2px solid rgba(255,255,255,.1); border-radius:12px; background:rgba(255,255,255,.05); color:#fff; font-size:.95rem; outline:none; }
-input[type=text]:focus { border-color:#00f2ea; }
-input[type=text]::placeholder { color:#666; }
-button { border:none; border-radius:12px; padding:13px 18px; font-size:.95rem; font-weight:600; cursor:pointer; }
-.btn-primary { background:linear-gradient(135deg,#ff0050,#ff4081); color:#fff; }
-.btn-primary:disabled { opacity:.5; }
-.btn-voice { background:rgba(0,242,234,.15); color:#00f2ea; border:1px solid rgba(0,242,234,.3); padding:13px 13px; }
-.btn-voice.listening { background:rgba(255,0,80,.2); color:#ff4081; }
-.loading { text-align:center; padding:14px; color:#00f2ea; display:none; }
-.loading.active { display:block; }
-.spinner { display:inline-block; width:16px; height:16px; border:3px solid rgba(0,242,234,.3); border-top-color:#00f2ea; border-radius:50%; animation:spin .8s linear infinite; margin-right:8px; vertical-align:middle; }
-@keyframes spin { to { transform:rotate(360deg); } }
-.error { background:rgba(255,0,80,.1); border:1px solid rgba(255,0,80,.3); border-radius:12px; padding:12px 16px; color:#ff6b6b; margin-bottom:14px; display:none; }
-.error.active { display:block; }
-.results { display:none; }
-.results.active { display:block; }
-.card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:16px; margin-bottom:12px; }
-.card h2 { font-size:.95rem; color:#00f2ea; margin-bottom:12px; }
-.field { margin-bottom:11px; }
-.field label { display:block; font-size:.7rem; color:#888; text-transform:uppercase; margin-bottom:4px; }
-.value-box { background:rgba(0,0,0,.3); border-radius:8px; padding:9px 12px; font-family:'Courier New',monospace; font-size:.82rem; word-break:break-all; color:#eee; }
-.copy-btn { margin-top:5px; padding:5px 11px; font-size:.7rem; border-radius:6px; background:rgba(0,242,234,.12); color:#00f2ea; border:1px solid rgba(0,242,234,.25); cursor:pointer; }
-.thumb-preview { max-width:220px; border-radius:10px; margin-top:8px; display:none; }
-.embed-preview { background:#000; border-radius:10px; padding:14px; margin-top:8px; overflow-x:auto; }
-.badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:.7rem; margin-left:6px; }
-.badge-rapid { background:rgba(0,242,234,.15); color:#00f2ea; }
-.badge-scrape { background:rgba(255,193,7,.15); color:#ffc107; }
-.badge-oembed { background:rgba(255,255,255,.1); color:#aaa; }
-@media (max-width:600px){ .input-row { flex-direction:column; } h1 { font-size:1.3rem; } }
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+body{background:#0a0a0a;min-height:100vh;color:#fff;padding:14px}
+.hd{max-width:900px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:center;padding:10px 0}
+.hd h1{color:#ff3366;font-size:1.3rem}
+.hd a{color:#888;text-decoration:none;font-size:.82rem;padding:8px 12px;border:1px solid #333;border-radius:8px}
+.box{background:#141414;border:1px solid #222;border-radius:14px;padding:18px;max-width:900px;margin:0 auto 14px}
+.box h2{color:#ff3366;font-size:1rem;margin-bottom:12px}
+label{display:block;font-size:.75rem;color:#ffc107;margin-bottom:5px;font-weight:600}
+input,textarea{width:100%;padding:11px;border-radius:8px;background:#000;color:#fff;border:1px solid #333;font-size:.85rem;font-family:monospace}
+input:focus,textarea:focus{outline:none;border-color:#ff3366}
+textarea{min-height:160px;resize:vertical;line-height:1.7}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+button{border:none;border-radius:8px;padding:12px 16px;font-size:.88rem;font-weight:600;cursor:pointer}
+.b-main{background:#ff3366;color:#fff;flex:1;min-width:140px}
+.b-main:disabled{opacity:.5;cursor:not-allowed}
+.b-alt{background:#222;color:#00f2ea;border:1px solid #333}
+.status{display:none;margin-top:14px;padding:12px;background:#000;border-radius:8px;color:#00f2ea;font-size:.85rem;text-align:center}
+.status.show{display:block}
+.bar{height:6px;background:#222;border-radius:3px;margin-top:8px;overflow:hidden}
+.fill{height:100%;background:#ff3366;width:0%;transition:width .3s}
+.out{display:none}
+.out.show{display:block}
+pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-family:monospace;font-size:.78rem;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#ddd;max-height:500px;overflow-y:auto}
+.fmt{background:#000;border-radius:8px;padding:12px;font-family:monospace;font-size:.78rem;color:#aaa;line-height:1.7;margin-bottom:12px}
+.fmt b{color:#00f2ea}
+.tag{display:inline-block;background:#4caf50;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:10px;margin-left:8px}
+.hint{font-size:.72rem;color:#666;margin-top:5px}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>🎵 TikTok Extractor</h1>
-<p class="subtitle">ভিডিও লিংক পেস্ট করুন বা ভয়েসে বলুন</p>
 
-<div class="input-row">
-<input id="urlInput" type="text" placeholder="https://www.tiktok.com/@username/video/1234567890">
-<button class="btn-voice" id="voiceBtn" onclick="toggleVoice()">🎤</button>
-<button class="btn-primary" id="extractBtn" onclick="extract()">বের করুন</button>
+<div class="hd">
+  <h1>📦 Bulk Import <span class="tag">RapidAPI</span></h1>
+  <a href="/">← Dashboard</a>
 </div>
 
-<div class="loading" id="loading"><span class="spinner"></span> ডেটা বের করা হচ্ছে...</div>
-<div class="error" id="error"></div>
+<div class="box">
+  <h2>Format</h2>
+  <div class="fmt">
+    প্রতি লাইনে একটি TikTok লিংক পেস্ট করুন।<br>
+    <b>Title | TikTok URL/ID | Category | Thumbnail URL</b>
+  </div>
 
-<div class="results" id="results">
-<div class="card">
-<h2>👤 ইউজার তথ্য <span id="r-badge"></span></h2>
-<div class="field"><label>ইউজারনেম</label><div class="value-box" id="r-username">-</div></div>
-<div class="field"><label>ইউজার ID</label><div class="value-box" id="r-userid">-</div><button class="copy-btn" onclick="copyValue('r-userid')">📋 কপি</button></div>
-<div class="field"><label>SEC_UID</label><div class="value-box" id="r-secuid">-</div><button class="copy-btn" onclick="copyValue('r-secuid')">📋 কপি</button></div>
-<div class="field"><label>নিকনেম</label><div class="value-box" id="r-nickname">-</div></div>
-<div class="field"><label>ফলোয়ার</label><div class="value-box" id="r-followers">-</div></div>
+  <label>🔑 RapidAPI Key (একবার দিন — ব্রাউজারে সেভ থাকবে)</label>
+  <input id="key" type="text" placeholder="dd30d5448cmsh..." style="margin-bottom:14px" autocomplete="off">
+
+  <label>📥 TikTok লিংকগুলো (প্রতি লাইনে একটি)</label>
+  <textarea id="inp" placeholder="https://vt.tiktok.com/ZSbkNHyWs/
+https://vt.tiktok.com/ZSbkNUXgA/
+https://vt.tiktok.com/ZSbkNGVFN/"></textarea>
+  <div class="hint">💡 Short link (vt.tiktok.com) সাপোর্ট করে। প্রতি লাইনে একটি লিংক।</div>
+
+  <label style="margin-top:12px">Default Category (ঐচ্ছিক)</label>
+  <input id="cat" type="text" placeholder="যেমন: Trending">
+
+  <div class="btn-row">
+    <button class="b-main" id="go" onclick="run()">🚀 Import</button>
+    <button class="b-alt" onclick="clearAll()">🗑️ Clear</button>
+  </div>
+
+  <div class="status" id="st">
+    <span id="stx">প্রসেস হচ্ছে...</span>
+    <div class="bar"><div class="fill" id="fl"></div></div>
+  </div>
 </div>
 
-<div class="card">
-<h2>🎬 ভিডিও তথ্য</h2>
-<div class="field"><label>ভিডিও ID</label><div class="value-box" id="r-videoid">-</div><button class="copy-btn" onclick="copyValue('r-videoid')">📋 কপি</button></div>
-<div class="field"><label>টাইটেল</label><div class="value-box" id="r-title">-</div></div>
-<div class="field"><label>থাম্বনেইল URL</label><div class="value-box" id="r-thumb">-</div><button class="copy-btn" onclick="copyValue('r-thumb')">📋 কপি</button><img id="thumbPreview" class="thumb-preview" onerror="this.style.display='none'"></div>
-</div>
-
-<div class="card">
-<h2>🔗 এম্বেড কোড</h2>
-<div class="field"><label>HTML এম্বেড</label><div class="value-box" id="r-embed" style="white-space:pre-wrap; font-size:.75rem;">-</div><button class="copy-btn" onclick="copyValue('r-embed')">📋 কপি</button></div>
-<div class="embed-preview" id="embedPreview"></div>
-</div>
-</div>
+<div class="box out" id="out">
+  <h2>📤 আউটপুট: Title | TikTok ID | Category | Thumbnail URL</h2>
+  <pre id="res"></pre>
+  <div class="btn-row">
+    <button class="b-alt" onclick="copyAll()">📋 Copy All</button>
+    <button class="b-alt" onclick="downloadAll()">⬇️ Download</button>
+  </div>
 </div>
 
 <script>
-let recognition = null;
-let isListening = false;
+(function(){
+  'use strict';
 
-function initVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return null;
-  const rec = new SR();
-  rec.interimResults = false; rec.maxAlternatives = 1; rec.continuous = false;
-  rec.onresult = (e) => {
-    const text = e.results[0][0].transcript.trim();
-    const urlMatch = text.match(/https?:\/\/[^\s]+/);
-    document.getElementById('urlInput').value = urlMatch ? urlMatch[0] : text;
-  };
-  rec.onerror = () => stopVoice();
-  rec.onend = () => stopVoice();
-  return rec;
-}
+  // ========== DOM ==========
+  var $key  = document.getElementById('key');
+  var $inp  = document.getElementById('inp');
+  var $cat  = document.getElementById('cat');
+  var $go   = document.getElementById('go');
+  var $st   = document.getElementById('st');
+  var $stx  = document.getElementById('stx');
+  var $fl   = document.getElementById('fl');
+  var $out  = document.getElementById('out');
+  var $res  = document.getElementById('res');
 
-function toggleVoice() {
-  if (isListening) { stopVoice(); return; }
-  if (!recognition) recognition = initVoice();
-  if (!recognition) { showError('ভয়েস সাপোর্ট নেই। Chrome ব্যবহার করুন।'); return; }
-  recognition.lang = 'bn-BD';
+  var API_HOST = 'tiktok-scraper7.p.rapidapi.com';
+
+  // ========== API Key ==========
   try {
-    recognition.start(); isListening = true;
-    document.getElementById('voiceBtn').classList.add('listening');
-    document.getElementById('voiceBtn').textContent = '🔴';
-  } catch (e) { showError('ভয়েস চালু করা যায়নি'); }
-}
+    var saved = localStorage.getItem('RAPIDAPI_KEY');
+    if (saved) $key.value = saved;
+  } catch(e){}
 
-function stopVoice() {
-  isListening = false;
-  document.getElementById('voiceBtn').classList.remove('listening');
-  document.getElementById('voiceBtn').textContent = '🎤';
-}
+  $key.addEventListener('input', function(){
+    try { localStorage.setItem('RAPIDAPI_KEY', $key.value.trim()); } catch(e){}
+  });
 
-async function extract() {
-  const url = document.getElementById('urlInput').value.trim();
-  if (!url) { showError('TikTok লিংক দিন'); return; }
-  hideError();
-  document.getElementById('results').classList.remove('active');
-  document.getElementById('loading').classList.add('active');
-  document.getElementById('extractBtn').disabled = true;
-  try {
-    const res = await fetch('/api/extract', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-    const result = await res.json();
-    if (!res.ok || !result.success) throw new Error(result.error || 'ডেটা বের করা যায়নি');
-    displayResults(result.data);
-  } catch (e) {
-    showError(e.message || 'কিছু ভুল হয়েছে');
-  } finally {
-    document.getElementById('loading').classList.remove('active');
-    document.getElementById('extractBtn').disabled = false;
-  }
-}
-
-function displayResults(d) {
-  set('r-username', d.username || '-');
-  set('r-userid', d.userId || 'পাওয়া যায়নি');
-  set('r-secuid', d.secUid || 'পাওয়া যায়নি');
-  set('r-nickname', d.nickname || '-');
-  set('r-followers', d.followerCount != null ? d.followerCount.toLocaleString('bn-BD') : 'পাওয়া যায়নি');
-  set('r-videoid', d.videoId || '-');
-  set('r-title', d.title || '-');
-  set('r-thumb', d.thumbnailUrl || 'পাওয়া যায়নি');
-  set('r-embed', d.embedHtml || 'পাওয়া যায়নি');
-  const badge = document.getElementById('r-badge');
-  if (d.source === 'rapidapi') badge.innerHTML = '<span class="badge badge-rapid">RapidAPI</span>';
-  else if (d.source === 'scraping') badge.innerHTML = '<span class="badge badge-scrape">Scraping</span>';
-  else badge.innerHTML = '<span class="badge badge-oembed">oEmbed</span>';
-  const thumb = document.getElementById('thumbPreview');
-  if (d.thumbnailUrl) { thumb.src = d.thumbnailUrl; thumb.style.display = 'block'; }
-  else thumb.style.display = 'none';
-  const box = document.getElementById('embedPreview');
-  if (d.embedHtml) {
-    box.innerHTML = d.embedHtml;
-    if (!document.querySelector('script[src="https://www.tiktok.com/embed.js"]')) {
-      const s = document.createElement('script');
-      s.src = 'https://www.tiktok.com/embed.js';
-      s.async = true;
-      document.body.appendChild(s);
+  function getKey(){
+    try {
+      return (localStorage.getItem('RAPIDAPI_KEY') || $key.value || '').trim();
+    } catch(e){
+      return ($key.value || '').trim();
     }
-  } else box.innerHTML = '<p style="color:#666;">এম্বেড কোড নেই</p>';
-  document.getElementById('results').classList.add('active');
-}
+  }
 
-function set(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+  // ========== Helpers ==========
+  function extractId(url){
+    var m = url.match(/\/video\/(\d+)/);
+    if (m) return m[1];
+    var m2 = url.match(/\/v\/(\d+)/);
+    return m2 ? m2[1] : '';
+  }
 
-async function copyValue(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  try {
-    await navigator.clipboard.writeText(el.textContent);
-    const btn = el.parentElement.querySelector('.copy-btn');
-    if (btn) { const o = btn.textContent; btn.textContent = '✅'; setTimeout(() => btn.textContent = o, 1500); }
-  } catch { showError('কপি করা যায়নি'); }
-}
+  function cleanTitle(s){
+    s = String(s || '').replace(/\s+/g, ' ').trim();
+    if (!s) return 'Untitled';
+    if (s.length > 100) s = s.slice(0, 100).trim();
+    return s;
+  }
 
-function showError(m) { const el = document.getElementById('error'); el.textContent = '❌ ' + m; el.classList.add('active'); }
-function hideError() { document.getElementById('error').classList.remove('active'); }
-document.getElementById('urlInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') extract(); });
+  function sleep(ms){
+    return new Promise(function(r){ setTimeout(r, ms); });
+  }
+
+  // ========== API Call ==========
+  function fetchOne(url){
+    var key = getKey();
+    if (!key) return Promise.reject(new Error('RapidAPI Key নেই'));
+
+    var endpoint = 'https://' + API_HOST + '/video/info?url=' + encodeURIComponent(url);
+
+    return fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': key,
+        'X-RapidAPI-Host': API_HOST
+      }
+    }).then(function(r){
+      if (r.status === 429) { var e = new Error('RapidAPI লিমিট শেষ (429)'); e.code = 429; throw e; }
+      if (r.status === 403) { var e2 = new Error('RapidAPI Key ভুল (403)'); e2.code = 403; throw e2; }
+      if (r.status === 401) { var e3 = new Error('RapidAPI Unauthorized (401)'); e3.code = 401; throw e3; }
+      if (!r.ok) throw new Error('API এরর ' + r.status);
+      return r.json();
+    }).then(function(j){
+      if (!j || j.code !== 0 || !j.data) {
+        throw new Error(j && j.msg ? j.msg : 'ডেটা পাওয়া যায়নি');
+      }
+      return j.data;
+    });
+  }
+
+  // ========== Process one (429 হলে ১ বার retry) ==========
+  function processOne(url){
+    return fetchOne(url).then(function(d){
+      return {
+        ok: true,
+        title: cleanTitle(d.title),
+        id: String(d.id || d.video_id || extractId(url) || ''),
+        thumb: d.cover || d.origin_cover || d.dynamic_cover || ''
+      };
+    }).catch(function(e){
+      if (e.code === 429) {
+        return sleep(2000).then(function(){
+          return fetchOne(url);
+        }).then(function(d){
+          return {
+            ok: true,
+            title: cleanTitle(d.title),
+            id: String(d.id || d.video_id || extractId(url) || ''),
+            thumb: d.cover || d.origin_cover || d.dynamic_cover || ''
+          };
+        }).catch(function(e2){
+          return { ok: false, error: e2.message || 'ব্যর্থ' };
+        });
+      }
+      return { ok: false, error: e.message || 'ব্যর্থ' };
+    });
+  }
+
+  // ========== Main Run ==========
+  window.run = function(){
+    if (!getKey()) {
+      alert('⚠️ উপরে RapidAPI Key দিন');
+      try { $key.focus(); } catch(e){}
+      return;
+    }
+
+    var raw = ($inp.value || '').trim();
+    if (!raw) {
+      alert('⚠️ অনুগ্রহ করে কিছু TikTok লিংক দিন');
+      try { $inp.focus(); } catch(e){}
+      return;
+    }
+
+    var cat = ($cat.value || '').trim() || 'Trending';
+
+    // লাইন ভাগ (Windows \r\n সহ)
+    var lines = raw.replace(/\r/g, '').split('\n')
+      .map(function(l){ return l.trim(); })
+      .filter(function(l){ return l.length > 0; });
+
+    if (lines.length === 0) {
+      alert('⚠️ কোনো বৈধ লিংক পাওয়া যায়নি');
+      return;
+    }
+
+    var out = [];
+    $go.disabled = true;
+    $st.classList.add('show');
+    $out.classList.remove('show');
+    $res.textContent = '';
+    $fl.style.width = '0%';
+
+    var i = 0;
+
+    function next(){
+      if (i >= lines.length) {
+        // শেষ
+        $res.textContent = out.join('\n');
+        $st.classList.remove('show');
+        $go.disabled = false;
+        $out.classList.add('show');
+        $fl.style.width = '100%';
+        try { $out.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){}
+        return;
+      }
+
+      var url = lines[i];
+      var pct = Math.round((i / lines.length) * 100);
+      $fl.style.width = pct + '%';
+      $stx.textContent = 'প্রসেস হচ্ছে ' + (i + 1) + '/' + lines.length + '...';
+
+      processOne(url).then(function(r){
+        if (r.ok) {
+          out.push(r.title + ' | ' + r.id + ' | ' + cat + ' | ' + r.thumb);
+        } else {
+          out.push('ERROR | ' + url + ' | ' + cat + ' | ' + r.error);
+        }
+        i++;
+        // RapidAPI-তে চাপ কমাতে ছোট বিরতি
+        if (i < lines.length) {
+          sleep(300).then(next);
+        } else {
+          next();
+        }
+      });
+    }
+
+    next();
+  };
+
+  // ========== Clear / Copy / Download ==========
+  window.clearAll = function(){
+    $inp.value = '';
+    $out.classList.remove('show');
+    $res.textContent = '';
+    $fl.style.width = '0%';
+  };
+
+  window.copyAll = function(){
+    var t = $res.textContent || '';
+    if (!t) { alert('কপি করার মতো কিছু নেই'); return; }
+
+    function fallback(){
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = t;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert(ok ? '✅ Copy হয়েছে' : '❌ Copy ব্যর্থ');
+      } catch(e) {
+        alert('❌ Copy ব্যর্থ');
+      }
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t)
+        .then(function(){ alert('✅ Copy হয়েছে'); })
+        .catch(fallback);
+    } else {
+      fallback();
+    }
+  };
+
+  window.downloadAll = function(){
+    var t = $res.textContent || '';
+    if (!t) { alert('ডাউনলোড করার মতো কিছু নেই'); return; }
+
+    try {
+      var b = new Blob([t], { type: 'text/plain;charset=utf-8' });
+      var u = URL.createObjectURL(b);
+      var a = document.createElement('a');
+      a.href = u;
+      a.download = 'bulk-output-' + Date.now() + '.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(u); }, 1000);
+    } catch(e) {
+      alert('❌ Download ব্যর্থ');
+    }
+  };
+
+})();
 </script>
 </body>
 </html>
