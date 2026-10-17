@@ -222,13 +222,19 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     toast('🧹 History cleared', false);
   };
 
+  // ===== FIXED TOAST (Notification Error Solved) =====
   function toast(msg, isError) {
     $toast.textContent = msg;
     $toast.classList.toggle('error', !!isError);
     $toast.classList.add('show');
     setTimeout(function() { $toast.classList.remove('show'); }, 3500);
-    if ('Notification' in window && Notification.permission === 'granted' && !isError) {
-      new Notification('TikTok', { body: msg });
+    
+    try {
+      if ('Notification' in window && Notification.permission === 'granted' && !isError) {
+        new Notification('TikTok', { body: msg });
+      }
+    } catch(e) {
+      // iOS বা যেসব ডিভাইসে Notification সাপোর্ট করে না, সেখানে চুপচাপ ইগনোর করবে
     }
   }
 
@@ -280,9 +286,8 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     var urls = extractUrls(raw);
     if (!urls.length) return alert('⚠️ কোনো TikTok লিংক পাওয়া যায়নি।');
 
-    // ⭐ Discover Mode check (যদি ১টির বেশি লিংক থাকে)
     if ($autoDiscover.checked && urls.length > 1) {
-      urls = [urls[0]]; // শুধু প্রথম লিংকটাই নিবে
+      urls = [urls[0]]; 
       toast('ℹ️ Discover মোডে শুধুমাত্র প্রথম লিংকটি প্রসেস করা হবে।', false);
     }
 
@@ -392,10 +397,9 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     beep();
   };
 
-  // Auto-Import (পেস্ট করলেই অটো শুরু)
   $inp.addEventListener('paste', function() {
     if (!$autoImport.checked) return;
-    if ($autoDiscover.checked) return; // Discover মোডে অটো রান হবে না
+    if ($autoDiscover.checked) return;
     if (autoImportTimer) clearTimeout(autoImportTimer);
     autoImportTimer = setTimeout(function() {
       if (($inp.value || '').trim() && !isRunning) run();
@@ -455,7 +459,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
 
   window.downloadCSV = function() {
     var rows = ($res.textContent || '').split('\n').filter(function(l) { return l.trim(); }); if (!rows.length) return toast('কিছু নেই', true);
-    
     if ($autoDiscover.checked) {
       var csvLines = rows.map(function(line){ return csvEscape(line); }).join('\n');
       try {
@@ -465,7 +468,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
       } catch(e) { toast('❌ Failed', true); }
       return;
     }
-
     var header = 'Title,TikTok ID,Category,Thumbnail URL\n';
     var csv = rows.map(function(line) {
       var parts = line.split('|').map(function(p) { return p.trim(); });
