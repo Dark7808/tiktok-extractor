@@ -78,6 +78,7 @@ export default async function handler(req, res) {
       const fetchPromises = [];
       const LIMIT = 30; 
 
+      // ১. Creator এর ভিডিও
       if (username) {
         fetchPromises.push(fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=${LIMIT}`).then(r => r.json()).then(json => {
           if (json && json.code === 0 && json.data && json.data.videos) {
@@ -86,14 +87,16 @@ export default async function handler(req, res) {
         }).catch(() => {}));
       }
 
+      // ২. Music এর ভিডিও (আপডেট করা endpoint)
       if (musicId) {
-        fetchPromises.push(fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=${LIMIT}`).then(r => r.json()).then(json => {
+        fetchPromises.push(fetch(`https://tikwm.com/api/music/videos?music_id=${musicId}&count=${LIMIT}`).then(r => r.json()).then(json => {
           if (json && json.code === 0 && json.data && json.data.videos) {
             json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
           }
         }).catch(() => {}));
       }
 
+      // ৩. Hashtag এর ভিডিও
       if (challengeId || challengeName) {
         const queryParam = challengeId ? `ch_id=${challengeId}` : `ch_name=${encodeURIComponent(challengeName)}`;
         fetchPromises.push(fetch(`https://tikwm.com/api/challenge/posts?${queryParam}&count=${LIMIT}`).then(r => r.json()).then(json => {
@@ -119,6 +122,7 @@ export default async function handler(req, res) {
 }
 
 // ============ Helpers ============
+// (আগের মতোই থাকবে, কোন পরিবর্তন নেই)
 function safeText(s, maxLen) {
   s = String(s || '').replace(/\s+/g, ' ').trim();
   s = s.replace(/\|/g, '/');
