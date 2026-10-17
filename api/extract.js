@@ -1,19 +1,13 @@
-// api/extract.js (Vercel Serverless Function)
+// api/extract.js (Vercel Serverless Function) - Ultimate Fix
 
 export default async function handler(req, res) {
-  // CORS হেডার সেট করা
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'POST only' });
-  }
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   try {
     let body = req.body || {};
@@ -30,26 +24,30 @@ export default async function handler(req, res) {
     if (!cleaned) return res.status(400).json({ error: 'অবৈধ TikTok URL' });
     url = cleaned;
 
-    // ---- Fetch Base Video Data ----
+    // API রিকোয়েস্টের জন্য রিয়েল ব্রাউজার হেডার
+    const fetchHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json',
+      'Accept-Language': 'en-US,en;q=0.9'
+    };
+
+    // ---- 1. Fetch Base Video Data ----
     let videoData = null;
     try {
       const tikwmUrl = 'https://tikwm.com/api/?url=' + encodeURIComponent(url) + '&hd=1';
-      const apiRes = await fetch(tikwmUrl, {
-        method: 'GET',
-        headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' }
-      });
+      const apiRes = await fetch(tikwmUrl, { headers: fetchHeaders });
       if (apiRes.ok) {
         const json = await apiRes.json();
         if (json && json.code === 0 && json.data) videoData = json.data;
       }
     } catch (e) {}
 
-    if (!videoData) return res.status(502).json({ error: 'মূল ভিডিও ডেটা পাওয়া যায়নি' });
+    if (!videoData) return res.status(502).json({ error: 'মূল ভিডিও ডেটা পাওয়া যায়নি (API ব্লক বা ডিলিট)' });
 
     const d = videoData;
     const originalId = String(d.id || '');
 
-    // ---- 1. Normal Extract ----
+    // ---- 2. Normal Extract ----
     if (action === 'extract') {
       return res.status(200).json({
         success: true,
@@ -63,54 +61,56 @@ export default async function handler(req, res) {
       });
     }
 
-    // ---- 2. Auto Discover Mode ----
+    // ---- 3. Auto Discover Mode ----
     if (action === 'discover') {
       const username = (d.author && d.author.unique_id) || '';
       const musicId = (d.music_info && d.music_info.id) || '';
-      let challengeId = '';
-      let challengeName = '';
-      if (d.challenges && d.challenges.length > 0) {
-        challengeId = d.challenges[0].id || '';
-        challengeName = d.challenges[0].title || '';
-      }
-
+      
       let relatedLinks = new Set();
       const fetchPromises = [];
-      const LIMIT = 30; 
 
-      // ১. Creator এর ভিডিও
+      // ১. Creator এর ভিডিও (সবচেয়ে নির্ভরযোগ্য)
       if (username) {
-        fetchPromises.push(fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=${LIMIT}`).then(r => r.json()).then(json => {
-          if (json && json.code === 0 && json.data && json.data.videos) {
-            json.data.videos.forEach(v => { if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
-          }
-        }).catch(() => {}));
+        fetchPromises.push(
+          fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=30&cursor=0`, { headers: fetchHeaders })
+            .then(r => r.json())
+            .then(json => {
+              if (json && json.code === 0 && json.data && json.data.videos) {
+                json.data.videos.forEach(v => { if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
+              }
+            }).catch(() => {})
+        );
       }
 
-      // ২. Music এর ভিডিও (আপডেট করা endpoint)
+      // ২. Music এর ভিডিও (ফিক্স করা endpoint)
       if (musicId) {
-        fetchPromises.push(fetch(`https://tikwm.com/api/music/videos?music_id=${musicId}&count=${LIMIT}`).then(r => r.json()).then(json => {
-          if (json && json.code === 0 && json.data && json.data.videos) {
-            json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
-          }
-        }).catch(() => {}));
+        fetchPromises.push(
+          fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=30&cursor=0`, { headers: fetchHeaders })
+            .then(r => r.json())
+            .then(json => {
+              if (json && json.code === 0 && json.data && json.data.videos) {
+                json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
+              }
+            }).catch(() => {})
+        );
       }
 
-      // ৩. Hashtag এর ভিডিও
-      if (challengeId || challengeName) {
-        const queryParam = challengeId ? `ch_id=${challengeId}` : `ch_name=${encodeURIComponent(challengeName)}`;
-        fetchPromises.push(fetch(`https://tikwm.com/api/challenge/posts?${queryParam}&count=${LIMIT}`).then(r => r.json()).then(json => {
-          if (json && json.code === 0 && json.data && json.data.videos) {
-            json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
-          }
-        }).catch(() => {}));
-      }
-
-      await Promise.all(fetchPromises);
+      // Vercel ১০ সেকেন্ডে টাইমআউট করে, তাই ৮ সেকেন্ডের সেফটি টাইমার
+      const timeout = new Promise(resolve => setTimeout(resolve, 8000));
+      
+      // Promise.allSettled ব্যবহার করা হয়েছে যাতে একটি ফেল করলেও অন্যটা কাজ করে
+      await Promise.race([
+        Promise.allSettled(fetchPromises),
+        timeout
+      ]);
 
       return res.status(200).json({
         success: true,
-        data: { originalId: originalId, relatedCount: relatedLinks.size, relatedLinks: Array.from(relatedLinks) }
+        data: { 
+          originalId: originalId, 
+          relatedCount: relatedLinks.size, 
+          relatedLinks: Array.from(relatedLinks) 
+        }
       });
     }
 
@@ -122,7 +122,6 @@ export default async function handler(req, res) {
 }
 
 // ============ Helpers ============
-// (আগের মতোই থাকবে, কোন পরিবর্তন নেই)
 function safeText(s, maxLen) {
   s = String(s || '').replace(/\s+/g, ' ').trim();
   s = s.replace(/\|/g, '/');
