@@ -222,20 +222,16 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     toast('🧹 History cleared', false);
   };
 
-  // ===== FIXED TOAST (Notification Error Solved) =====
   function toast(msg, isError) {
     $toast.textContent = msg;
     $toast.classList.toggle('error', !!isError);
     $toast.classList.add('show');
     setTimeout(function() { $toast.classList.remove('show'); }, 3500);
-    
     try {
       if ('Notification' in window && Notification.permission === 'granted' && !isError) {
         new Notification('TikTok', { body: msg });
       }
-    } catch(e) {
-      // iOS বা যেসব ডিভাইসে Notification সাপোর্ট করে না, সেখানে চুপচাপ ইগনোর করবে
-    }
+    } catch(e) {}
   }
 
   function beep() {
@@ -277,7 +273,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     } catch(e) { return { ok: false, error: e.message || 'ব্যর্থ' }; }
   }
 
-  // ===== Main Run =====
   window.run = async function(){
     if (isRunning) return;
     var raw = ($inp.value || '').trim();
@@ -299,7 +294,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     $fl.style.width = '0%';
     $stOk.textContent = '0'; $stSkip.textContent = '0'; $stErr.textContent = '0'; $stRate.textContent = '0/s';
 
-    // ⭐⭐ Discover Mode Logic ⭐⭐
     if ($autoDiscover.checked) {
       $stx.textContent = '🔍 রিলেটেড ভিডিও (১০০+) খোঁজা হচ্ছে...';
       $fl.style.width = '50%'; 
@@ -310,7 +304,7 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
         var d = await callServer(targetUrl, 'discover');
         
         if (!d.relatedLinks || d.relatedLinks.length === 0) {
-          $res.textContent = 'দুঃখিত, এই ভিডিওর সাথে সম্পর্কিত আর কোনো ভিডিও পাওয়া যায়নি।';
+          $res.textContent = 'দুঃখিত, এই ভিডিওর সাথে সম্পর্কিত আর কোনো ভিডিও পাওয়া যায়নি। (TikWM API-তে এই ভিডিওর ডেটা এখনো আপডেট হয়নি, অনুগ্রহ করে অন্য একটি জনপ্রিয় ভিডিওর লিংক দিয়ে চেষ্টা করুন)।';
         } else {
           $res.textContent = '✅ ' + d.relatedLinks.length + ' টি আসল ভিডিও পাওয়া গেছে:\n\n' + d.relatedLinks.join('\n');
         }
@@ -332,7 +326,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
       return; 
     }
 
-    // ⭐⭐ Normal Bulk Mode Logic (Turbo) ⭐⭐
     var useAuto = $autoCat.checked;
     var useDup = $dupCheck.checked;
     var defaultCat = ($cat.value || '').trim() || 'Trending';
@@ -397,9 +390,9 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     beep();
   };
 
+  // ⭐ Auto-Import Paste Event (Fixed) ⭐
   $inp.addEventListener('paste', function() {
     if (!$autoImport.checked) return;
-    if ($autoDiscover.checked) return;
     if (autoImportTimer) clearTimeout(autoImportTimer);
     autoImportTimer = setTimeout(function() {
       if (($inp.value || '').trim() && !isRunning) run();
