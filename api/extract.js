@@ -1,4 +1,4 @@
-// api/extract.js (Vercel Serverless Function) - Ultimate & Bug Free
+// api/extract.js (Vercel Serverless Function) - With Optional Login Support
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,19 +17,75 @@ export default async function handler(req, res) {
 
     let url = (body.url || '').trim();
     const action = body.action || 'extract';
+    const sessionId = body.sessionId || ''; // ইউজারের কুকি (যদি লগইন করা থাকে)
 
+    const fetchHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json',
+      'Accept-Language': 'en-US,en;q=0.9'
+    };
+
+    // লগইন করা থাকলে হেডারে কুকি যোগ করা
+    if (sessionId) {
+      fetchHeaders['Cookie'] = `sessionid=${sessionId}`;
+    }
+
+    // ---- 1. Fetch Feed (Explore / For You) ----
+    if (action === 'feed') {
+      const region = body.region || 'BD'; 
+      try {
+        // TikWM API-তে পার্সোনাল ফিড সাপোর্ট করে না, তবে কুকি দিলে চেষ্টা করবে
+        const feedUrl = `https://tikwm.com/api/feed/list?region=${region}&count=20`;
+        const apiRes = await fetch(feedUrl, { headers: fetchHeaders });
+        const json = await apiRes.json();
+        
+        if (json && json.code === 0 && json.data) {
+          const videos = json.data.map(v => ({
+            id: v.video_id,
+            title: v.title || 'No title',
+            link: `https://www.tiktok.com/@${v.author.unique_id}/video/${v.video_id}`,
+            author: v.author.unique_id
+          }));
+          return res.status(200).json({ success: true, data: videos });
+        }
+        return res.status(200).json({ success: false, error: 'ফিড ডেটা পাওয়া যায়নি' });
+      } catch (e) {
+        return res.status(500).json({ error: 'ফিড লোড করতে সমস্যা হচ্ছে' });
+      }
+    }
+
+    // ---- 2. Fetch Following (কুকি ছাড়া কাজ করবে না, তবে কোডে রেডি রাখা হলো) ----
+    if (action === 'following') {
+       if (!sessionId) return res.status(401).json({ error: 'Following ফিড দেখতে হলে লগইন (Session ID) করতে হবে।' });
+       
+       // (ভবিষ্যতে পেইড API দিলে এখানে সেটা ব্যবহার করবেন)
+       return res.status(200).json({ success: false, error: 'ফ্রি API-তে Following ফিড সাপোর্ট করে না।' });
+    }
+
+    // ---- 3. Fetch Live Stream ----
+    if (action === 'live') {
+      const username = body.username || '';
+      if (!username) return res.status(400).json({ error: 'ইউজারনেম দিন' });
+      try {
+        const liveUrl = `https://tikwm.com/api/live/info?unique_id=${username}`;
+        const apiRes = await fetch(liveUrl, { headers: fetchHeaders });
+        const json = await apiRes.json();
+        
+        if (json && json.code === 0 && json.data) {
+          return res.status(200).json({ success: true, data: json.data });
+        }
+        return res.status(200).json({ success: false, error: 'এই ইউজার লাইভে নেই বা ডেটা পাওয়া যায়নি' });
+      } catch (e) {
+        return res.status(500).json({ error: 'লাইভ স্ট্যাটাস চেক করা যায়নি' });
+      }
+    }
+
+    // ---- 4. Single Extract & Discover ----
     if (!url) return res.status(400).json({ error: 'URL required' });
-
     const cleaned = universalClean(url);
     if (!cleaned) return res.status(400).json({ error: 'অবৈধ TikTok URL' });
     url = cleaned;
 
-    const fetchHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json'
-    };
-
-    // ---- 1. Fetch Base Video Data ----
     let videoData = null;
     try {
       const tikwmUrl = 'https://tikwm.com/api/?url=' + encodeURIComponent(url) + '&hd=1';
@@ -45,7 +101,6 @@ export default async function handler(req, res) {
     const d = videoData;
     const originalId = String(d.id || '');
 
-    // ---- 2. Normal Extract ----
     if (action === 'extract') {
       return res.status(200).json({
         success: true,
@@ -59,7 +114,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // ---- 3. Auto Discover Mode ----
     if (action === 'discover') {
       const username = (d.author && d.author.unique_id) || '';
       const musicId = (d.music_info && d.music_info.id) || '';
@@ -68,30 +122,22 @@ export default async function handler(req, res) {
       const fetchPromises = [];
 
       if (username) {
-        fetchPromises.push(
-          fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=30&cursor=0`, { headers: fetchHeaders })
-            .then(r => r.json())
-            .then(json => {
-              if (json && json.code === 0 && json.data && json.data.videos) {
-                json.data.videos.forEach(v => { if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
-              }
-            }).catch(() => {})
-        );
+        fetchPromises.push(fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=30`, { headers: fetchHeaders }).then(r => r.json()).then(json => {
+          if (json && json.code === 0 && json.data && json.data.videos) {
+            json.data.videos.forEach(v => { if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
+          }
+        }).catch(() => {}));
       }
 
       if (musicId) {
-        fetchPromises.push(
-          fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=30&cursor=0`, { headers: fetchHeaders })
-            .then(r => r.json())
-            .then(json => {
-              if (json && json.code === 0 && json.data && json.data.videos) {
-                json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
-              }
-            }).catch(() => {})
-        );
+        fetchPromises.push(fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=30`, { headers: fetchHeaders }).then(r => r.json()).then(json => {
+          if (json && json.code === 0 && json.data && json.data.videos) {
+            json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
+          }
+        }).catch(() => {}));
       }
 
-      const timeout = new Promise(resolve => setTimeout(resolve, 8000));
+      const timeout = new Promise(resolve => setTimeout(resolve, 7000));
       await Promise.race([Promise.allSettled(fetchPromises), timeout]);
 
       return res.status(200).json({
