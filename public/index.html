@@ -67,7 +67,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
   <label>📥 TikTok লিংক (যেকোনো ফরম্যাট)</label>
   <textarea id="inp" placeholder="https://vt.tiktok.com/ZSgjAnRoJ/"></textarea>
 
-  <!-- ⭐ ডিসকভারি মোড ⭐ -->
   <div class="disc-row">
     <input type="checkbox" id="autoDiscover">
     <label for="autoDiscover">🔍 Discover Mode — ১টি লিংক থেকে ১০০+ রিলেটেড ভিডিও (Creator + Tag + Music)</label>
@@ -390,7 +389,6 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
     beep();
   };
 
-  // ⭐ Auto-Import Paste Event (Fixed) ⭐
   $inp.addEventListener('paste', function() {
     if (!$autoImport.checked) return;
     if (autoImportTimer) clearTimeout(autoImportTimer);
