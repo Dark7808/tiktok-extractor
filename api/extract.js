@@ -1,4 +1,4 @@
-// api/extract.js (Vercel Serverless Function) - With Optional Login Support
+// api/extract.js (Ultimate All-in-One Version)
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,52 +17,34 @@ export default async function handler(req, res) {
 
     let url = (body.url || '').trim();
     const action = body.action || 'extract';
-    const sessionId = body.sessionId || ''; // ইউজারের কুকি (যদি লগইন করা থাকে)
+    const sessionId = body.sessionId || ''; 
+    const region = body.region || 'BD';
 
     const fetchHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json',
-      'Accept-Language': 'en-US,en;q=0.9'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': 'application/json'
     };
+    if (sessionId) fetchHeaders['Cookie'] = `sessionid=${sessionId}`;
 
-    // লগইন করা থাকলে হেডারে কুকি যোগ করা
-    if (sessionId) {
-      fetchHeaders['Cookie'] = `sessionid=${sessionId}`;
-    }
-
-    // ---- 1. Fetch Feed (Explore / For You) ----
+    // ================== ১. EXPLORE FEED ==================
     if (action === 'feed') {
-      const region = body.region || 'BD'; 
       try {
-        // TikWM API-তে পার্সোনাল ফিড সাপোর্ট করে না, তবে কুকি দিলে চেষ্টা করবে
         const feedUrl = `https://tikwm.com/api/feed/list?region=${region}&count=20`;
         const apiRes = await fetch(feedUrl, { headers: fetchHeaders });
         const json = await apiRes.json();
-        
         if (json && json.code === 0 && json.data) {
           const videos = json.data.map(v => ({
-            id: v.video_id,
-            title: v.title || 'No title',
+            id: v.video_id, title: v.title || 'No title',
             link: `https://www.tiktok.com/@${v.author.unique_id}/video/${v.video_id}`,
             author: v.author.unique_id
           }));
           return res.status(200).json({ success: true, data: videos });
         }
-        return res.status(200).json({ success: false, error: 'ফিড ডেটা পাওয়া যায়নি' });
-      } catch (e) {
-        return res.status(500).json({ error: 'ফিড লোড করতে সমস্যা হচ্ছে' });
-      }
+        return res.status(200).json({ success: false, error: 'ফিড পাওয়া যায়নি' });
+      } catch (e) { return res.status(500).json({ error: 'ফিড লোড এরর' }); }
     }
 
-    // ---- 2. Fetch Following (কুকি ছাড়া কাজ করবে না, তবে কোডে রেডি রাখা হলো) ----
-    if (action === 'following') {
-       if (!sessionId) return res.status(401).json({ error: 'Following ফিড দেখতে হলে লগইন (Session ID) করতে হবে।' });
-       
-       // (ভবিষ্যতে পেইড API দিলে এখানে সেটা ব্যবহার করবেন)
-       return res.status(200).json({ success: false, error: 'ফ্রি API-তে Following ফিড সাপোর্ট করে না।' });
-    }
-
-    // ---- 3. Fetch Live Stream ----
+    // ================== ২. LIVE STREAM ==================
     if (action === 'live') {
       const username = body.username || '';
       if (!username) return res.status(400).json({ error: 'ইউজারনেম দিন' });
@@ -70,86 +52,107 @@ export default async function handler(req, res) {
         const liveUrl = `https://tikwm.com/api/live/info?unique_id=${username}`;
         const apiRes = await fetch(liveUrl, { headers: fetchHeaders });
         const json = await apiRes.json();
-        
-        if (json && json.code === 0 && json.data) {
-          return res.status(200).json({ success: true, data: json.data });
-        }
-        return res.status(200).json({ success: false, error: 'এই ইউজার লাইভে নেই বা ডেটা পাওয়া যায়নি' });
-      } catch (e) {
-        return res.status(500).json({ error: 'লাইভ স্ট্যাটাস চেক করা যায়নি' });
-      }
+        if (json && json.code === 0 && json.data) return res.status(200).json({ success: true, data: json.data });
+        return res.status(200).json({ success: false, error: 'লাইভে নেই' });
+      } catch (e) { return res.status(500).json({ error: 'লাইভ চেক এরর' }); }
     }
 
-    // ---- 4. Single Extract & Discover ----
+    // ================== ৩. SINGLE EXTRACT ==================
     if (!url) return res.status(400).json({ error: 'URL required' });
     const cleaned = universalClean(url);
-    if (!cleaned) return res.status(400).json({ error: 'অবৈধ TikTok URL' });
+    if (!cleaned) return res.status(400).json({ error: 'অবৈধ URL' });
     url = cleaned;
 
-    let videoData = null;
-    try {
-      const tikwmUrl = 'https://tikwm.com/api/?url=' + encodeURIComponent(url) + '&hd=1';
-      const apiRes = await fetch(tikwmUrl, { headers: fetchHeaders });
-      if (apiRes.ok) {
-        const json = await apiRes.json();
-        if (json && json.code === 0 && json.data) videoData = json.data;
-      }
-    } catch (e) {}
-
-    if (!videoData) return res.status(502).json({ error: 'মূল ভিডিও ডেটা পাওয়া যায়নি' });
-
-    const d = videoData;
-    const originalId = String(d.id || '');
-
     if (action === 'extract') {
-      return res.status(200).json({
-        success: true,
-        data: {
-          title: safeText(d.title, 100),
-          videoId: originalId,
-          thumbnailUrl: d.cover || d.origin_cover || '',
-          autoCategory: detectCategory(d.title || '', d.music_info || {}),
-          source: 'tikwm'
+      try {
+        const tikwmUrl = 'https://tikwm.com/api/?url=' + encodeURIComponent(url) + '&hd=1';
+        const apiRes = await fetch(tikwmUrl, { headers: fetchHeaders });
+        if (apiRes.ok) {
+          const json = await apiRes.json();
+          if (json && json.code === 0 && json.data) {
+            const d = json.data;
+            return res.status(200).json({
+              success: true,
+              data: {
+                title: safeText(d.title, 100),
+                videoId: String(d.id || ''),
+                thumbnailUrl: d.cover || d.origin_cover || '',
+                autoCategory: detectCategory(d.title || '', d.music_info || {})
+              }
+            });
+          }
         }
-      });
+        return res.status(404).json({ success: false, error: 'ভিডিও ডেটা পাওয়া যায়নি' });
+      } catch (e) { return res.status(500).json({ success: false, error: 'নেটওয়ার্ক এরর' }); }
     }
 
+    // ================== ৪. DISCOVER MODE ==================
     if (action === 'discover') {
-      const username = (d.author && d.author.unique_id) || '';
-      const musicId = (d.music_info && d.music_info.id) || '';
-      
-      let relatedLinks = new Set();
-      const fetchPromises = [];
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000); // ৭ সেকেন্ডে বন্ধ হবে
 
-      if (username) {
-        fetchPromises.push(fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=30`, { headers: fetchHeaders }).then(r => r.json()).then(json => {
-          if (json && json.code === 0 && json.data && json.data.videos) {
-            json.data.videos.forEach(v => { if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
-          }
-        }).catch(() => {}));
+      try {
+        const tikwmUrl = 'https://tikwm.com/api/?url=' + encodeURIComponent(url) + '&hd=1';
+        const baseRes = await fetch(tikwmUrl, { headers: fetchHeaders, signal: controller.signal });
+        const baseJson = await baseRes.json();
+
+        if (!baseJson || baseJson.code !== 0 || !baseJson.data) {
+          clearTimeout(timeoutId);
+          return res.status(404).json({ success: false, error: 'মূল ভিডিও পাওয়া যায়নি' });
+        }
+
+        const d = baseJson.data;
+        const originalId = String(d.id || '');
+        const username = (d.author && d.author.unique_id) || '';
+        const musicId = (d.music_info && d.music_info.id) || '';
+
+        let relatedLinks = new Set();
+        const fetchPromises = [];
+
+        if (username) {
+          fetchPromises.push(
+            fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=25`, { headers: fetchHeaders, signal: controller.signal })
+              .then(r => r.json()).then(json => {
+                if (json && json.code === 0 && json.data && json.data.videos) {
+                  json.data.videos.forEach(v => { if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
+                }
+              }).catch(() => {})
+          );
+        }
+
+        if (musicId) {
+          fetchPromises.push(
+            fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=25`, { headers: fetchHeaders, signal: controller.signal })
+              .then(r => r.json()).then(json => {
+                if (json && json.code === 0 && json.data && json.data.videos) {
+                  json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
+                }
+              }).catch(() => {})
+          );
+        }
+
+        // ৭ সেকেন্ড অপেক্ষা করবে, এরপর যা পেয়েছে তাই দিবে
+        await Promise.race([
+            Promise.allSettled(fetchPromises),
+            new Promise(resolve => setTimeout(resolve, 6500))
+        ]);
+
+        clearTimeout(timeoutId);
+        return res.status(200).json({
+          success: true,
+          data: { originalId, relatedCount: relatedLinks.size, relatedLinks: Array.from(relatedLinks) }
+        });
+
+      } catch (e) {
+        clearTimeout(timeoutId);
+        // টাইমআউট হলেও যা পেয়েছে তা রিটার্ন করবে (ক্র্যাশ করবে না)
+        return res.status(200).json({ success: true, data: { relatedLinks: [] } });
       }
-
-      if (musicId) {
-        fetchPromises.push(fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=30`, { headers: fetchHeaders }).then(r => r.json()).then(json => {
-          if (json && json.code === 0 && json.data && json.data.videos) {
-            json.data.videos.forEach(v => { const aId = v.author ? v.author.unique_id : 'user'; if (v.id && v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); });
-          }
-        }).catch(() => {}));
-      }
-
-      const timeout = new Promise(resolve => setTimeout(resolve, 7000));
-      await Promise.race([Promise.allSettled(fetchPromises), timeout]);
-
-      return res.status(200).json({
-        success: true,
-        data: { originalId: originalId, relatedCount: relatedLinks.size, relatedLinks: Array.from(relatedLinks) }
-      });
     }
 
     return res.status(400).json({ error: 'Invalid action' });
-
   } catch (err) {
-    return res.status(500).json({ error: 'সার্ভার এরর', details: err.message });
+    return res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 }
 
@@ -176,45 +179,22 @@ function universalClean(input) {
 function hasWord(text, word) {
   const safe = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   var re = new RegExp('(^|[^A-Za-z0-9])' + safe + '($|[^A-Za-z0-9])', 'i');
-  if (re.test(text)) return true;
-  var hashRe = new RegExp('#' + safe + '($|[^A-Za-z0-9])', 'i');
-  if (hashRe.test(text)) return true;
-  return false;
+  return re.test(text);
 }
 
 function detectCategory(title, music) {
-  const text = [String(title || ''), String((music && music.title) || ''), String((music && music.author) || '')].join(' ').toLowerCase();
+  const text = [String(title || ''), String((music && music.title) || '')].join(' ').toLowerCase();
   if (!text.trim()) return 'Trending';
-  const categories = [
-    { name: 'Dance',       words: ['dance', 'dancing', 'dancer', 'choreography', 'bailar', 'dancecover'] },
-    { name: 'Comedy',      words: ['funny', 'comedy', 'lol', 'laugh', 'humor', 'joke', 'memes', 'meme', 'hilarious', 'prank'] },
-    { name: 'Music',       words: ['music', 'song', 'singing', 'cover', 'karaoke', 'singer', 'melody', 'beat', 'lyrics'] },
-    { name: 'Acting',      words: ['acting', 'actor', 'actress', 'skit', 'drama', 'scene', 'performance'] },
-    { name: 'Entertainment', words: ['entertainment', 'celebrity', 'celeb', 'star', 'show', 'showbiz'] },
-    { name: 'Food',        words: ['food', 'recipe', 'cooking', 'cook', 'baking', 'cake', 'chef', 'foodie', 'kitchen'] },
-    { name: 'Fashion',     words: ['fashion', 'outfit', 'style', 'makeup', 'beauty', 'ootd', 'stylish', 'dress'] },
-    { name: 'Fitness',     words: ['fitness', 'workout', 'gym', 'exercise', 'yoga', 'training', 'body'] },
-    { name: 'Health',      words: ['health', 'healthy', 'wellness', 'diet', 'weight'] },
-    { name: 'Travel',      words: ['travel', 'trip', 'traveling', 'tour', 'tourist', 'vacation', 'wanderlust'] },
-    { name: 'Nature',      words: ['nature', 'sunset', 'sunrise', 'flower', 'mountain', 'ocean', 'sky', 'landscape'] },
-    { name: 'Sports',      words: ['sport', 'football', 'cricket', 'soccer', 'sports', 'basketball', 'tennis', 'goal'] },
-    { name: 'Gaming',      words: ['gaming', 'game', 'gamer', 'gameplay', 'pubg', 'freefire', 'minecraft'] },
-    { name: 'Pet',         words: ['pet', 'cat', 'dog', 'kitten', 'puppy', 'pets', 'animal', 'puppies'] },
-    { name: 'DIY',         words: ['diy', 'craft', 'handmade', 'tutorial', 'howto', 'how to', 'drawing', 'painting', 'art'] },
-    { name: 'Photography', words: ['photography', 'photo', 'camera', 'shot', 'photoshoot'] },
-    { name: 'Motivation',  words: ['motivation', 'motivational', 'inspiration', 'success', 'mindset', 'discipline'] },
-    { name: 'Technology',  words: ['tech', 'technology', 'gadget', 'phone', 'computer', 'programming', 'coding', 'ai'] },
-    { name: 'Education',   words: ['education', 'learn', 'learning', 'study', 'knowledge', 'tips', 'facts'] },
-    { name: 'Business',    words: ['business', 'entrepreneur', 'money', 'marketing', 'sales', 'startup'] },
-    { name: 'Family',      words: ['family', 'mom', 'dad', 'baby', 'kids', 'children', 'parenting'] },
-    { name: 'Relationship', words: ['love', 'couple', 'relationship', 'romantic', 'valentine'] },
-    { name: 'Trending',    words: ['trending', 'viral', 'fyp', 'foryou', 'for you', 'trend', 'explore'] }
+  const cats = [
+    { n: 'Dance', w: ['dance', 'dancing'] }, { n: 'Comedy', w: ['funny', 'comedy', 'lol', 'humor'] },
+    { n: 'Music', w: ['music', 'song', 'singing'] }, { n: 'Food', w: ['food', 'recipe', 'cooking'] },
+    { n: 'Fashion', w: ['fashion', 'outfit', 'style'] }, { n: 'Sports', w: ['sport', 'football', 'cricket'] },
+    { n: 'Pet', w: ['pet', 'cat', 'dog'] }, { n: 'Tech', w: ['tech', 'gadget', 'phone', 'coding'] }
   ];
-  let bestMatch = null, bestScore = 0;
-  for (let i = 0; i < categories.length; i++) {
-    const cat = categories[i]; let score = 0;
-    for (let j = 0; j < cat.words.length; j++) { if (hasWord(text, cat.words[j])) score += cat.words[j].length; }
-    if (score > bestScore) { bestScore = score; bestMatch = cat.name; }
+  let best = 'Trending', bestScore = 0;
+  for (let c of cats) {
+    let score = 0; c.w.forEach(w => { if (hasWord(text, w)) score += w.length; });
+    if (score > bestScore) { bestScore = score; best = c.n; }
   }
-  return bestMatch || 'Trending';
+  return best;
 }
