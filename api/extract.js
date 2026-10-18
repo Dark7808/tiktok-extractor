@@ -1,4 +1,4 @@
-// api/extract.js (Vercel Backend) - Connected to Render API
+// api/extract.js (Vercel Backend) - Ultimate Fix
 
 export const config = { maxDuration: 60 };
 const RENDER_API = 'https://tiktok-api-bqk1.onrender.com'; 
@@ -18,8 +18,10 @@ export default async function handler(req, res) {
     let url = (body.url || '').trim();
     const action = body.action || 'extract';
 
+    // ১. এক্সট্রাক্ট মোড
     if (action === 'extract') {
       if (!url) return res.status(400).json({ error: 'URL required' });
+      
       const response = await fetch(`${RENDER_API}/api/video?url=${encodeURIComponent(url)}`);
       const json = await response.json();
       
@@ -38,6 +40,7 @@ export default async function handler(req, res) {
       return res.status(404).json({ success: false, error: 'ভিডিও পাওয়া যায়নি' });
     }
 
+    // ২. ডিসকভার মোড
     if (action === 'discover') {
       if (!url) return res.status(400).json({ error: 'URL required' });
       
@@ -48,18 +51,20 @@ export default async function handler(req, res) {
 
       const d = baseJson.data;
       const originalId = String(d.id || '');
-      const username = (d.author && d.author.unique_id) || '';
+      const secUid = (d.author && d.author.sec_uid) || ''; 
       const musicId = (d.music_info && d.music_info.id) || '';
 
       let relatedLinks = new Set();
       const promises = [];
 
-      if (username) {
+      if (secUid) {
         promises.push(
-          fetch(`${RENDER_API}/api/user?username=${username}`)
+          fetch(`${RENDER_API}/api/user?secUid=${secUid}`)
             .then(r => r.json()).then(j => {
-              if (j.code === 0 && j.data && j.data.videos) {
-                j.data.videos.forEach(v => { if (v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${username}/video/${v.id}`); });
+              if (j.success && j.links) {
+                j.links.forEach(link => { 
+                  if (!link.includes(originalId)) relatedLinks.add(link); 
+                });
               }
             }).catch(() => {})
         );
@@ -72,7 +77,8 @@ export default async function handler(req, res) {
               if (j.code === 0 && j.data && j.data.videos) {
                 j.data.videos.forEach(v => { 
                   const aId = v.author ? v.author.unique_id : 'user';
-                  if (v.id !== originalId) relatedLinks.add(`https://www.tiktok.com/@${aId}/video/${v.id}`); 
+                  const link = `https://www.tiktok.com/@${aId}/video/${v.id}`;
+                  if (!link.includes(originalId)) relatedLinks.add(link); 
                 });
               }
             }).catch(() => {})
@@ -85,6 +91,26 @@ export default async function handler(req, res) {
         success: true,
         data: { relatedCount: relatedLinks.size, relatedLinks: Array.from(relatedLinks) }
       });
+    }
+
+    // ৩. ফিড মোড (Explore)
+    if (action === 'feed') {
+      const region = body.region || 'BD';
+      try {
+        const feedRes = await fetch(`${RENDER_API}/api/feed?region=${region}`);
+        const feedJson = await feedRes.json();
+        return res.status(200).json(feedJson);
+      } catch (e) { return res.status(500).json({ error: 'Feed error' }); }
+    }
+
+    // ৪. লাইভ মোড
+    if (action === 'live') {
+      const username = body.username || '';
+      try {
+        const liveRes = await fetch(`${RENDER_API}/api/live?username=${username}`);
+        const liveJson = await liveRes.json();
+        return res.status(200).json(liveJson);
+      } catch (e) { return res.status(500).json({ error: 'Live error' }); }
     }
 
     return res.status(400).json({ error: 'Invalid action' });
