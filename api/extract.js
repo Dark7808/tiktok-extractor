@@ -1,4 +1,4 @@
-// api/extract.js (Vercel Serverless Function) - Ultimate Fix
+// api/extract.js (Vercel Serverless Function) - Ultimate & Bug Free
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -24,11 +24,9 @@ export default async function handler(req, res) {
     if (!cleaned) return res.status(400).json({ error: 'অবৈধ TikTok URL' });
     url = cleaned;
 
-    // API রিকোয়েস্টের জন্য রিয়েল ব্রাউজার হেডার
     const fetchHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json',
-      'Accept-Language': 'en-US,en;q=0.9'
+      'Accept': 'application/json'
     };
 
     // ---- 1. Fetch Base Video Data ----
@@ -42,7 +40,7 @@ export default async function handler(req, res) {
       }
     } catch (e) {}
 
-    if (!videoData) return res.status(502).json({ error: 'মূল ভিডিও ডেটা পাওয়া যায়নি (API ব্লক বা ডিলিট)' });
+    if (!videoData) return res.status(502).json({ error: 'মূল ভিডিও ডেটা পাওয়া যায়নি' });
 
     const d = videoData;
     const originalId = String(d.id || '');
@@ -69,7 +67,6 @@ export default async function handler(req, res) {
       let relatedLinks = new Set();
       const fetchPromises = [];
 
-      // ১. Creator এর ভিডিও (সবচেয়ে নির্ভরযোগ্য)
       if (username) {
         fetchPromises.push(
           fetch(`https://tikwm.com/api/user/posts?unique_id=${username}&count=30&cursor=0`, { headers: fetchHeaders })
@@ -82,7 +79,6 @@ export default async function handler(req, res) {
         );
       }
 
-      // ২. Music এর ভিডিও (ফিক্স করা endpoint)
       if (musicId) {
         fetchPromises.push(
           fetch(`https://tikwm.com/api/music/posts?music_id=${musicId}&count=30&cursor=0`, { headers: fetchHeaders })
@@ -95,22 +91,12 @@ export default async function handler(req, res) {
         );
       }
 
-      // Vercel ১০ সেকেন্ডে টাইমআউট করে, তাই ৮ সেকেন্ডের সেফটি টাইমার
       const timeout = new Promise(resolve => setTimeout(resolve, 8000));
-      
-      // Promise.allSettled ব্যবহার করা হয়েছে যাতে একটি ফেল করলেও অন্যটা কাজ করে
-      await Promise.race([
-        Promise.allSettled(fetchPromises),
-        timeout
-      ]);
+      await Promise.race([Promise.allSettled(fetchPromises), timeout]);
 
       return res.status(200).json({
         success: true,
-        data: { 
-          originalId: originalId, 
-          relatedCount: relatedLinks.size, 
-          relatedLinks: Array.from(relatedLinks) 
-        }
+        data: { originalId: originalId, relatedCount: relatedLinks.size, relatedLinks: Array.from(relatedLinks) }
       });
     }
 
