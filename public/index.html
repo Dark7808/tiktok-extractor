@@ -10,28 +10,41 @@ body{background:#0a0a0a;min-height:100vh;color:#fff;padding:14px}
 .hd{max-width:900px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:center;padding:10px 0}
 .hd h1{color:#ff3366;font-size:1.2rem}
 .tabs{display:flex;gap:6px;margin-bottom:14px;background:#141414;padding:6px;border-radius:12px;border:1px solid #222;overflow-x:auto}
-.tab{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;color:#888;white-space:nowrap}
+.tab{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;color:#888;white-space:nowrap}
 .tab.active{background:#ff3366;color:#fff}
 .box{background:#141414;border:1px solid #222;border-radius:14px;padding:18px;max-width:900px;margin:0 auto 14px;display:none}
 .box.active{display:block}
-.box h2{color:#ff3366;font-size:1rem;margin-bottom:12px}
+.box h2{color:#ff3366;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 label{display:block;font-size:.75rem;color:#ffc107;margin-bottom:5px;font-weight:600}
 input,textarea,select{width:100%;padding:11px;border-radius:8px;background:#000;color:#fff;border:1px solid #333;font-size:.85rem;font-family:monospace}
-textarea{min-height:100px;resize:vertical}
+textarea{min-height:120px;resize:vertical;line-height:1.7}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#ff3366}
 .btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 button{border:none;border-radius:8px;padding:12px 16px;font-size:.88rem;font-weight:600;cursor:pointer}
 .b-main{background:#ff3366;color:#fff;flex:1;min-width:140px}
+.b-main:disabled{opacity:.5;cursor:not-allowed}
 .b-alt{background:#222;color:#00f2ea;border:1px solid #333}
-.b-green{background:#4caf50;color:#fff}
 .status{display:none;margin-top:14px;padding:12px;background:#000;border-radius:8px;color:#00f2ea;text-align:center}
 .status.show{display:block}
 pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-family:monospace;font-size:.78rem;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#ddd;max-height:400px;overflow-y:auto;margin-top:12px}
-.feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:14px}
+.fmt{background:#000;border-radius:8px;padding:12px;font-family:monospace;font-size:.78rem;color:#aaa;line-height:1.7;margin-bottom:12px}
+.fmt b{color:#00f2ea}
+.hint{font-size:.72rem;color:#666;margin-top:5px;line-height:1.7}
+.auto-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);border-radius:8px}
+.auto-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;cursor:pointer;accent-color:#4caf50;margin:0}
+.auto-row label{margin:0;color:#4caf50;font-size:.82rem;cursor:pointer;font-weight:500;line-height:1.4;text-transform:none}
+.disc-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;background:rgba(156,39,176,.08);border:1px solid rgba(156,39,176,.3);border-radius:8px}
+.disc-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;cursor:pointer;accent-color:#9c27b0;margin:0}
+.disc-row label{margin:0;color:#e91e63;font-size:.85rem;cursor:pointer;font-weight:600;line-height:1.4;text-transform:none}
+.speed-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;background:rgba(255,152,0,.08);border:1px solid rgba(255,152,0,.25);border-radius:8px;flex-wrap:wrap}
+.speed-row label{margin:0;color:#ff9800;font-size:.82rem;font-weight:500;text-transform:none;flex:1;min-width:180px}
+.speed-row select{background:#000;color:#ff9800;border:1px solid rgba(255,152,0,.4);border-radius:6px;padding:6px 10px;font-size:.82rem;font-family:monospace;cursor:pointer}
+.feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:14px}
 .feed-card{background:#000;border:1px solid #333;border-radius:10px;overflow:hidden}
 .feed-card img{width:100%;height:150px;object-fit:cover}
-.feed-card .content{padding:12px}
-.feed-card h4{color:#00f2ea;font-size:.85rem;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.feed-card a{display:inline-block;background:#ff3366;color:#fff;padding:6px 12px;border-radius:6px;font-size:.75rem;text-decoration:none;margin-top:5px}
+.feed-card .content{padding:10px}
+.feed-card h4{color:#00f2ea;font-size:.75rem;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed-card a{display:inline-block;background:#ff3366;color:#fff;padding:4px 8px;border-radius:4px;font-size:.7rem;text-decoration:none;margin-top:5px}
 </style>
 </head>
 <body>
@@ -39,39 +52,83 @@ pre{background:#000;border:1px solid #222;border-radius:10px;padding:14px;font-f
 <div class="hd"><h1>📦 TikTok Ultimate Scraper</h1></div>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('links', this)">📥 Bulk Links</div>
+  <div class="tab active" onclick="switchTab('extract', this)">📥 Bulk Links</div>
+  <div class="tab" onclick="switchTab('discover', this)">🔍 Discover</div>
   <div class="tab" onclick="switchTab('user', this)">👤 User Videos</div>
-  <div class="tab" onclick="switchTab('hashtag', this)">🏷️ Hashtag Search</div>
+  <div class="tab" onclick="switchTab('hashtag', this)">🏷️ Hashtag</div>
 </div>
 
-<!-- TAB 1: BULK LINKS -->
-<div class="box active" id="tab-links">
-  <h2>Bulk Extract from Links</h2>
-  <label>📥 TikTok লিংক পেস্ট করুন (প্রতি লাইনে একটি)</label>
-  <textarea id="inpLinks" placeholder="https://vt.tiktok.com/ZSgjofPnM/
-https://vt.tiktok.com/ZSg6ywF3e/"></textarea>
+<!-- ১. EXTRACT (BULK LINKS) -->
+<div class="box active" id="tab-extract">
+  <h2>Bulk Extract Data</h2>
+  <div class="fmt">
+    <b>যেকোনো ফরম্যাটে লিংক পেস্ট করুন!</b><br>
+    প্রতি লাইনে একটি, একই লাইনে অনেকগুলো, টেক্সটের ভেতরে — সিস্টেম নিজেই খুঁজে বের করবে।
+  </div>
   
-  <div style="margin-top:12px; display:flex; gap:10px; align-items:center">
-    <input type="checkbox" id="autoNotification" checked style="width:20px;height:20px">
-    <label for="autoNotification" style="margin:0;color:#4caf50">🔔 প্রসেস শেষে নোটিফিকেশন দিন</label>
+  <label>📥 TikTok লিংক</label>
+  <textarea id="inpExtract" placeholder="https://vt.tiktok.com/ZSgjofPnM/"></textarea>
+
+  <div class="speed-row">
+    <label for="speedMode">⚡ Speed Mode</label>
+    <select id="speedMode">
+      <option value="1">🐢 Safe (1x)</option>
+      <option value="3" selected>🚗 Normal (3x)</option>
+      <option value="5">🏎️ Fast (5x)</option>
+      <option value="8">⚡ Turbo (8x)</option>
+    </select>
+  </div>
+
+  <div class="auto-row">
+    <input type="checkbox" id="autoCat" checked>
+    <label for="autoCat">🎯 Smart Auto Category</label>
+  </div>
+
+  <div class="auto-row" style="background:rgba(156,39,176,.08);border-color:rgba(156,39,176,.25)">
+    <input type="checkbox" id="autoImport" checked>
+    <label for="autoImport" style="color:#9c27b0">⚡ Bulk Auto-Import (পেস্ট করলেই শুরু)</label>
+  </div>
+
+  <div class="auto-row" style="background:rgba(0,242,234,.08);border-color:rgba(0,242,234,.25)">
+    <input type="checkbox" id="dupCheck" checked>
+    <label for="dupCheck" style="color:#00f2ea">🔍 Duplicate Detection</label>
   </div>
 
   <div class="btn-row">
-    <button class="b-main" onclick="runLinks()" id="btnLinks">🚀 Extract Links</button>
-    <button class="b-alt" onclick="clearAll('resLinks')">🗑️ Clear</button>
+    <button class="b-main" id="btnExtract" onclick="runExtract()">🚀 Extract</button>
+    <button class="b-alt" onclick="clearRes('resExtract', 'outExtract')">🗑️ Clear</button>
   </div>
 
-  <div class="status" id="stLinks">প্রসেস হচ্ছে...</div>
-  <pre id="resLinks" style="display:none"></pre>
-  
-  <div class="btn-row" id="actionLinks" style="display:none">
-    <button class="b-alt" onclick="copyData('resLinks')">📋 Copy</button>
-    <button class="b-alt" onclick="downloadTXT('resLinks')">⬇️ .txt</button>
-    <button class="b-alt" onclick="downloadCSV('resLinks')">📊 .csv</button>
+  <div class="status" id="stExtract">প্রসেস হচ্ছে...</div>
+  <div class="out" id="outExtract" style="display:none">
+    <pre id="resExtract"></pre>
+    <div class="btn-row">
+      <button class="b-alt" onclick="copyAll('resExtract')">📋 Copy All</button>
+      <button class="b-alt" onclick="downloadTXT('resExtract')">⬇️ .txt</button>
+      <button class="b-alt" onclick="downloadCSV('resExtract')">📊 .csv</button>
+      <button class="b-alt" style="background:#4caf50;color:#fff" onclick="copyForSheets('resExtract')">🟢 Copy for Sheets</button>
+    </div>
   </div>
 </div>
 
-<!-- TAB 2: USER VIDEOS -->
+<!-- ২. DISCOVER -->
+<div class="box" id="tab-discover">
+  <h2>Discover Mode (Music)</h2>
+  <label>📥 ১টি TikTok লিংক দিন</label>
+  <textarea id="inpDiscover" placeholder="https://vt.tiktok.com/ZSgjofPnM/"></textarea>
+  <div class="btn-row">
+    <button class="b-main" style="background:#9c27b0" onclick="runDiscover()">🔍 Discover</button>
+  </div>
+  <div class="status" id="stDiscover">খোঁজা হচ্ছে...</div>
+  <div class="out" id="outDiscover" style="display:none">
+    <pre id="resDiscover"></pre>
+    <div class="btn-row">
+      <button class="b-alt" onclick="copyAll('resDiscover')">📋 Copy All</button>
+    </div>
+  </div>
+</div>
+
+<!-- ৩. USER VIDEOS -->
 <div class="box" id="tab-user">
   <h2>Fetch Videos by Username</h2>
   <label>👤 ইউজারনেম দিন (@ ছাড়া)</label>
@@ -83,7 +140,7 @@ https://vt.tiktok.com/ZSg6ywF3e/"></textarea>
   <div class="feed-grid" id="userGrid"></div>
 </div>
 
-<!-- TAB 3: HASHTAG -->
+<!-- ৪. HASHTAG -->
 <div class="box" id="tab-hashtag">
   <h2>Search by Hashtag</h2>
   <label>🏷️ হ্যাশট্যাগ দিন (# ছাড়া)</label>
@@ -96,6 +153,8 @@ https://vt.tiktok.com/ZSg6ywF3e/"></textarea>
 </div>
 
 <script>
+let history = JSON.parse(localStorage.getItem('tt_history') || '[]');
+
 function switchTab(id, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.box').forEach(b=>b.classList.remove('active'));
@@ -110,55 +169,86 @@ async function api(payload) {
   return res.json();
 }
 
-// ১. Bulk Links (Parallel Processing for Speed)
-async function runLinks() {
-  const raw = document.getElementById('inpLinks').value.trim();
+// ১. Bulk Extract (Parallel Processing with Speed Mode)
+async function runExtract() {
+  const raw = document.getElementById('inpExtract').value.trim();
   if(!raw) return alert('লিংক দিন');
+  
   const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l);
-  const st = document.getElementById('stLinks'), res = document.getElementById('resLinks');
-  const btn = document.getElementById('btnLinks');
+  const isDup = document.getElementById('dupCheck').checked;
+  const speed = parseInt(document.getElementById('speedMode').value);
   
-  st.style.display = 'block'; st.textContent = `প্রসেস হচ্ছে 0/${lines.length}...`;
-  res.style.display = 'none'; document.getElementById('actionLinks').style.display = 'none';
-  btn.disabled = true;
+  const st = document.getElementById('stExtract'), out = document.getElementById('outExtract'), res = document.getElementById('resExtract');
+  const btn = document.getElementById('btnExtract');
+  
+  st.classList.add('show'); out.style.display = 'none'; btn.disabled = true;
+  res.textContent = '';
 
-  // Parallel Fetching for Speed (Max 5 at a time)
-  let results = [];
+  let outputs = [];
   let completed = 0;
-  const chunkSize = 5; 
   
-  for (let i = 0; i < lines.length; i += chunkSize) {
-    const chunk = lines.slice(i, i + chunkSize);
+  // Parallel processing chunk
+  for (let i = 0; i < lines.length; i += speed) {
+    const chunk = lines.slice(i, i + speed);
     const promises = chunk.map(async (link) => {
+      if(isDup && history.includes(link)) {
+        completed++; st.textContent = `প্রসেস হচ্ছে ${completed}/${lines.length}...`;
+        return `SKIP | ${link} | (Duplicate)`;
+      }
       try {
-        const d = await api({ url: link, action: 'extract' });
-        completed++;
-        st.textContent = `প্রসেস হচ্ছে ${completed}/${lines.length}...`;
-        if (d.success && d.data) {
-          return `${d.data.title} | ${d.data.videoId} | ${d.data.thumbnailUrl}`;
+        let d = await api({ url: link, action: 'extract' });
+        completed++; st.textContent = `প্রসেস হচ্ছে ${completed}/${lines.length}...`;
+        if(d.success && d.data) {
+          if(!history.includes(link)) history.push(link);
+          return `${d.data.title} | ${d.data.videoId} | ${d.data.autoCategory} | ${d.data.thumbnailUrl}`;
         } else {
           return `ERROR | ${link} | Failed`;
         }
-      } catch (e) {
+      } catch(e) {
         completed++;
         return `ERROR | ${link} | Network Error`;
       }
     });
     
-    const chunkResults = await Promise.all(promises);
-    results.push(...chunkResults);
+    const results = await Promise.all(promises);
+    outputs.push(...results);
   }
-
-  st.style.display = 'none'; btn.disabled = false;
-  res.style.display = 'block'; res.textContent = results.join('\n');
-  document.getElementById('actionLinks').style.display = 'flex';
   
-  if(document.getElementById('autoNotification').checked) {
-    sendNotification('Extraction Complete!', `${lines.length} টি লিংক প্রসেস করা হয়েছে।`);
-  }
+  localStorage.setItem('tt_history', JSON.stringify(history));
+  st.classList.remove('show'); out.style.display = 'block'; btn.disabled = false;
+  res.textContent = outputs.join('\n');
+  
+  sendNotification('Extraction Complete!', `${lines.length} টি লিংক প্রসেস করা হয়েছে।`);
 }
 
-// ২. Fetch User Videos
+// Auto-Import on Paste
+document.getElementById('inpExtract').addEventListener('paste', function() {
+  setTimeout(() => {
+    if(document.getElementById('autoImport').checked && document.getElementById('inpExtract').value.trim()) {
+      runExtract();
+    }
+  }, 500);
+});
+
+// ২. Discover
+async function runDiscover() {
+  const url = document.getElementById('inpDiscover').value.trim().split('\n')[0];
+  if(!url) return alert('লিংক দিন');
+  const st = document.getElementById('stDiscover'), out = document.getElementById('outDiscover'), res = document.getElementById('resDiscover');
+  st.classList.add('show'); out.style.display = 'none'; st.textContent = '🔍 Discover চলছে...';
+  try {
+    let d = await api({ url: url, action: 'discover' });
+    st.classList.remove('show'); out.style.display = 'block';
+    if(d.success && d.data.relatedLinks.length > 0) {
+      res.textContent = `✅ ${d.data.relatedLinks.length} টি ভিডিও পাওয়া গেছে:\n\n` + d.data.relatedLinks.join('\n');
+      sendNotification('Discover Complete!', `${d.data.relatedLinks.length} টি ভিডিও পাওয়া গেছে।`);
+    } else {
+      res.textContent = 'দুঃখিত, এই ভিডিওর রিলেটেড ডেটা পাওয়া যায়নি।';
+    }
+  } catch(e) { st.classList.remove('show'); out.style.display = 'block'; res.textContent = 'সার্ভার এরর'; }
+}
+
+// ৩. Fetch User Videos
 async function runUser() {
   const user = document.getElementById('inpUser').value.trim().replace('@','');
   if(!user) return alert('ইউজারনেম দিন');
@@ -177,18 +267,18 @@ async function runUser() {
             <img src="${v.thumbnail}" alt="thumb">
             <div class="content">
               <h4>${v.title}</h4>
-              <a href="${v.link}" target="_blank">🔗 Watch Video</a>
+              <a href="${v.link}" target="_blank">🔗 Watch</a>
             </div>
           </div>`;
       });
       sendNotification('User Videos Loaded!', `@${user} এর ${d.videos.length} টি ভিডিও পাওয়া গেছে।`);
     } else {
-      grid.innerHTML = '<p style="color:#aaa">কোনো ভিডিও পাওয়া যায়নি।</p>';
+      grid.innerHTML = '<p style="color:#aaa;padding:10px">কোনো ভিডিও পাওয়া যায়নি।</p>';
     }
   } catch(e) { st.style.display='none'; btn.disabled = false; alert('Error'); }
 }
 
-// ৩. Fetch Hashtag Videos
+// ৪. Fetch Hashtag Videos
 async function runHashtag() {
   const tag = document.getElementById('inpHashtag').value.trim().replace('#','');
   if(!tag) return alert('হ্যাশট্যাগ দিন');
@@ -207,18 +297,18 @@ async function runHashtag() {
             <img src="${v.thumbnail}" alt="thumb">
             <div class="content">
               <h4>${v.title}</h4>
-              <a href="${v.link}" target="_blank">🔗 Watch Video</a>
+              <a href="${v.link}" target="_blank">🔗 Watch</a>
             </div>
           </div>`;
       });
-      sendNotification('Hashtag Videos Loaded!', `#${tag} এর ${d.videos.length} টি ভিডিও পাওয়া গেছে।`);
+      sendNotification('Hashtag Loaded!', `#${tag} এর ${d.videos.length} টি ভিডিও পাওয়া গেছে।`);
     } else {
-      grid.innerHTML = '<p style="color:#aaa">এই হ্যাশট্যাগে কোনো ভিডিও পাওয়া যায়নি।</p>';
+      grid.innerHTML = '<p style="color:#aaa;padding:10px">এই হ্যাশট্যাগে কোনো ভিডিও পাওয়া যায়নি।</p>';
     }
   } catch(e) { st.style.display='none'; btn.disabled = false; alert('Error'); }
 }
 
-// Notification Function
+// Notification System
 function sendNotification(title, body) {
   if (!("Notification" in window)) return;
   if (Notification.permission === "granted") {
@@ -231,26 +321,38 @@ function sendNotification(title, body) {
 }
 
 // Helpers (Clear, Copy, TXT, CSV)
-function clearAll(id) {
-  document.getElementById(id).value = '';
-  document.getElementById(id).style.display = 'none';
-  document.getElementById('actionLinks').style.display = 'none';
+function clearRes(resId, outId) {
+  document.getElementById(resId).textContent = '';
+  document.getElementById(outId).style.display = 'none';
 }
-function copyData(id) {
-  const txt = document.getElementById(id).textContent;
-  navigator.clipboard.writeText(txt).then(() => alert('Copied!'));
+function copyAll(resId) {
+  const txt = document.getElementById(resId).textContent;
+  if(!txt) return;
+  navigator.clipboard.writeText(txt).then(()=>alert('Copied!'));
 }
-function downloadTXT(id) {
-  const txt = document.getElementById(id).textContent;
+function copyForSheets(resId) {
+  const txt = document.getElementById(resId).textContent;
+  if(!txt) return;
+  const tsv = txt.split('\n').map(line => {
+    const parts = line.split('|').map(p=>p.trim());
+    return parts.join('\t');
+  }).join('\n');
+  navigator.clipboard.writeText(tsv).then(()=>alert('Copied for Sheets!'));
+}
+function downloadTXT(resId) {
+  const txt = document.getElementById(resId).textContent;
+  if(!txt) return;
   const blob = new Blob([txt], {type: 'text/plain;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'tiktok.txt'; a.click();
 }
-function downloadCSV(id) {
-  const txt = document.getElementById(id).textContent;
+function downloadCSV(resId) {
+  const txt = document.getElementById(resId).textContent;
+  if(!txt) return;
   const csv = txt.split('\n').map(line => {
-    return line.split('|').map(p => p.trim()).join(',');
+    const parts = line.split('|').map(p=>p.trim());
+    return parts.map(p => p.includes(',') ? `"${p}"` : p).join(',');
   }).join('\n');
   const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
