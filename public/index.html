@@ -28,8 +28,9 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .card h2 { font-size: 16px; margin-bottom: 12px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
 
-        textarea { width: 100%; height: 130px; background: #0b1120; color: #38bdf8; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 12px; outline: none; }
-        textarea:focus { border-color: var(--accent-color); }
+        textarea, input[type="text"] { width: 100%; padding: 12px; background: #0b1120; color: #38bdf8; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 13px; margin-bottom: 12px; outline: none; }
+        textarea { height: 110px; resize: vertical; }
+        textarea:focus, input[type="text"]:focus { border-color: var(--accent-color); }
 
         .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
         .control-item { display: flex; flex-direction: column; gap: 5px; }
@@ -44,7 +45,7 @@
         .progress-bar-container { width: 100%; height: 6px; background: #0b1120; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
         .progress-bar { height: 100%; width: 0%; background: var(--accent-color); transition: width 0.3s; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #0b1120; padding: 10px; border-radius: 8px; text-align: center; font-size: 11px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #0b1120; padding: 10px; border-radius: 8px; text-align: center; font-size: 11px; }
         .stat-val { font-size: 14px; font-weight: bold; margin-top: 2px; }
 
         .output-textarea { height: 260px; color: var(--success); }
@@ -61,39 +62,37 @@
         <h1>📦 TikTok Ultimate Extractor <span>TURBO</span></h1>
     </div>
 
-    <!-- Input Card -->
+    <!-- Mode 1: Category / Hashtag Scraper -->
     <div class="card">
-        <h2>📥 ইনপুট (Auto-Discover TikTok Links)</h2>
-        <textarea id="rawInput" placeholder="এখানে টিকটক ভিডিও লিংক পেস্ট করুন...
-উদাহরণ: https://vt.tiktok.com/ZSgP1t5sM/"></textarea>
-
+        <h2>🔥 ক্যাটেগরি বা হ্যাশট্যাগ দিয়ে ভিডিও খুঁজুন (For You / Explore)</h2>
+        <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">লিংক কাজ না করলে এখান থেকে সরাসরি কিওয়ার্ড দিয়ে ট্রেন্ডিং ভিডিও বের করুন।</div>
+        <input type="text" id="keywordInput" placeholder="যেমন: trending, foryou, viral, funny, bangla">
+        
         <div class="controls-grid">
             <div class="control-item">
-                <label>⚡ আউটপুট ফরম্যাট:</label>
-                <select id="outputFormat">
-                    <option value="meta">ক্যাপশন | Video ID | Thumbnail URL</option>
-                    <option value="links" selected>শুধু ভিডিও শেয়ার লিংক (Share URLs)</option>
-                </select>
-            </div>
-            <div class="control-item">
-                <label>🎯 Related Video Limit:</label>
-                <select id="relatedLimit">
-                    <option value="0">শুধু মূল লিংক (0)</option>
-                    <option value="20" selected>২০ টি সম্পর্কিত ভিডিও</option>
-                    <option value="50">৫০ টি সম্পর্কিত ভিডিও</option>
-                    <option value="100">১০০ টি সম্পর্কিত ভিডিও</option>
+                <label>কতগুলো ভিডিও বের করবেন?</label>
+                <select id="keywordLimit">
+                    <option value="30">৩০ টি ভিডিও</option>
+                    <option value="50" selected>৫০ টি ভিডিও</option>
+                    <option value="100">১০০ টি ভিডিও</option>
+                    <option value="500">৫০০ টি ভিডিও</option>
                 </select>
             </div>
         </div>
+        <button class="btn-main" onclick="scrapeByKeyword()">🔍 ক্যাটেগরি থেকে ভিডিও বের করুন</button>
+    </div>
 
-        <button id="startBtn" class="btn-main" onclick="startExtraction()">🚀 এক্সট্র্যাক্ট শুরু করুন</button>
+    <!-- Mode 2: Link Input -->
+    <div class="card">
+        <h2>📥 লিংক ইনপুট (Auto-Discover TikTok Links)</h2>
+        <textarea id="rawInput" placeholder="অথবা এখানে টিকটক ভিডিও লিংক দিন..."></textarea>
+        <button id="startBtn" class="btn-main" onclick="startExtraction()">🚀 লিংক থেকে এক্সট্র্যাক্ট করুন</button>
 
         <div id="progressSection" class="progress-section">
             <div class="progress-bar-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
             <div class="stats-grid">
-                <div>মোট<div id="statTotal" class="stat-val" style="color:#38bdf8;">0</div></div>
                 <div>সফল<div id="statSuccess" class="stat-val" style="color:var(--success);">0</div></div>
                 <div>স্কিপ<div id="statSkip" class="stat-val" style="color:#f59e0b;">0</div></div>
                 <div>এরর<div id="statError" class="stat-val" style="color:var(--error);">0</div></div>
@@ -116,8 +115,46 @@
 </div>
 
 <script>
-let isProcessing = false;
 let extractedResults = new Set();
+
+async function scrapeByKeyword() {
+    let keyword = document.getElementById('keywordInput').value.trim();
+    if (!keyword) keyword = "trending";
+    const limit = parseInt(document.getElementById('keywordLimit').value);
+
+    document.getElementById('outputArea').value = "খোঁজা হচ্ছে... দয়া করে অপেক্ষা করুন।";
+    
+    try {
+        let cursor = 0;
+        let countFetched = 0;
+        extractedResults.clear();
+
+        while (countFetched < limit) {
+            const feedUrl = `https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}&count=50&cursor=${cursor}`;
+            const res = await fetch(feedUrl);
+            const json = await res.json();
+
+            if (json && json.data && json.data.videos && json.data.videos.length > 0) {
+                for (const vid of json.data.videos) {
+                    if (vid.author && vid.author.unique_id && vid.video_id) {
+                        const shareUrl = `https://www.tiktok.com/@${vid.author.unique_id}/video/${vid.video_id}`;
+                        extractedResults.add(shareUrl);
+                        countFetched++;
+                        if (countFetched >= limit) break;
+                    }
+                }
+                cursor += 50;
+            } else {
+                break;
+            }
+        }
+
+        renderOutput();
+        alert(`সফলভাবে ${extractedResults.size} টি ভিডিওর লিংক সংগ্রহ করা হয়েছে!`);
+    } catch (e) {
+        alert("এরর হয়েছে: " + e.message);
+    }
+}
 
 function extractUrls(text) {
     const pattern = /(https?:\/\/(?:www\.|vt\.|vm\.|t\.)?tiktok\.com\/[^\s"'>]+)/gi;
@@ -126,8 +163,6 @@ function extractUrls(text) {
 }
 
 async function startExtraction() {
-    if (isProcessing) return;
-
     const rawText = document.getElementById('rawInput').value;
     const urls = extractUrls(rawText);
 
@@ -136,102 +171,34 @@ async function startExtraction() {
         return;
     }
 
-    const limit = parseInt(document.getElementById('relatedLimit').value);
-    const formatMode = document.getElementById('outputFormat').value;
-
-    isProcessing = true;
-    document.getElementById('startBtn').disabled = true;
     document.getElementById('progressSection').style.display = 'block';
-
-    let total = urls.length;
     let success = 0, skip = 0, error = 0;
-    let startTime = Date.now();
 
     for (let i = 0; i < urls.length; i++) {
-        const url = urls[i];
         try {
-            const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
+            const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(urls[i])}`;
             const res = await fetch(apiEndpoint);
             const json = await res.json();
 
             if (json && json.data) {
-                const data = json.data;
+                const username = json.data.author?.unique_id || 'user';
+                const shareUrl = `https://www.tiktok.com/@${username}/video/${json.data.id}`;
                 
-                let resultLine = "";
-                if (formatMode === "meta") {
-                    const caption = (data.title || "TikTok Video").replace(/\n/g, ' ');
-                    const videoId = data.id || "0000000";
-                    const cover = data.cover || data.origin_cover || "";
-                    resultLine = `${caption} | ${videoId} | ${cover}`;
-                } else {
-                    const username = data.author?.unique_id || 'user';
-                    resultLine = `https://www.tiktok.com/@${username}/video/${data.id}`;
-                }
-
-                if (!extractedResults.has(resultLine)) {
-                    extractedResults.add(resultLine);
+                if (!extractedResults.has(shareUrl)) {
+                    extractedResults.add(shareUrl);
                     success++;
                 } else {
                     skip++;
                 }
-
-                if (limit > 0 && data.title) {
-                    const tagMatch = data.title.match(/#\w+/g);
-                    const keyword = tagMatch ? tagMatch[0].replace('#', '') : "trending";
-                    
-                    const feedUrl = `https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}&count=${limit}`;
-                    const feedRes = await fetch(feedUrl);
-                    const feedJson = await feedRes.json();
-
-                    if (feedJson && feedJson.data && feedJson.data.videos) {
-                        for (const vid of feedJson.data.videos) {
-                            let relLine = "";
-                            if (formatMode === "meta") {
-                                const relCap = (vid.title || "Related Video").replace(/\n/g, ' ');
-                                relLine = `${relCap} | ${vid.video_id} | ${vid.cover}`;
-                            } else {
-                                relLine = `https://www.tiktok.com/@${vid.author.unique_id}/video/${vid.video_id}`;
-                            }
-
-                            if (!extractedResults.has(relLine)) {
-                                extractedResults.add(relLine);
-                                success++;
-                            } else {
-                                skip++;
-                            }
-                        }
-                    }
-                }
-
             } else {
                 error++;
             }
         } catch (e) {
-            console.error(e);
             error++;
         }
-
-        let processed = success + skip + error;
-        let elapsed = (Date.now() - startTime) / 1000;
-        let rate = elapsed > 0 ? (processed / elapsed).toFixed(1) : 0;
-        let percent = Math.min(100, Math.round(((i + 1) / total) * 100));
-
-        updateDashboard(total, success, skip, error, `${rate}/s`, percent);
         renderOutput();
     }
-
-    isProcessing = false;
-    document.getElementById('startBtn').disabled = false;
-    alert("এক্সট্র্যাক্ট সফলভাবে সম্পূর্ণ হয়েছে!");
-}
-
-function updateDashboard(total, success, skip, error, rate, percent) {
-    document.getElementById('statTotal').innerText = total;
-    document.getElementById('statSuccess').innerText = success;
-    document.getElementById('statSkip').innerText = skip;
-    document.getElementById('statError').innerText = error;
-    document.getElementById('statRate').innerText = rate;
-    document.getElementById('progressBar').style.width = percent + '%';
+    alert("এক্সট্র্যাক্ট সম্পন্ন হয়েছে!");
 }
 
 function renderOutput() {
@@ -260,6 +227,7 @@ function downloadTxt() {
 
 function clearAll() {
     extractedResults.clear();
+    document.getElementById('keywordInput').value = '';
     document.getElementById('rawInput').value = '';
     document.getElementById('outputArea').value = '';
     document.getElementById('outputCount').innerText = '0';
