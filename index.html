@@ -65,7 +65,6 @@
                     <option value="30">৩০ টি</option>
                     <option value="50" selected>৫০ টি</option>
                     <option value="100">১০০ টি</option>
-                    <option value="500">৫০০ টি</option>
                 </select>
             </div>
         </div>
@@ -75,7 +74,7 @@
     <!-- Mode 2: Link Resolver -->
     <div class="card">
         <h2>📥 শর্ট লিংক বা ভিডিও লিংক পেস্ট করুন</h2>
-        <textarea id="rawInput" placeholder="এখানে টিকটক লিংক দিন... (যেমন: https://vt.tiktok.com/ZSgP1t5sM/)"></textarea>
+        <textarea id="rawInput" placeholder="এখানে টিকটক লিংক দিন... (একাধিক লিংক একসাথে পেস্ট করতে পারেন)"></textarea>
         <button class="btn-main" onclick="startExtraction()">🚀 লিংক কনভার্ট করুন</button>
     </div>
 
@@ -95,6 +94,26 @@
 <script>
 let extractedResults = new Set();
 
+async function fetchWithFallback(targetUrl) {
+    const proxies = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+    ];
+
+    for (const proxyUrl of proxies) {
+        try {
+            const res = await fetch(proxyUrl);
+            if (res.ok) {
+                const json = await res.json();
+                return json;
+            }
+        } catch (e) {
+            // try next proxy
+        }
+    }
+    return null;
+}
+
 async function scrapeByKeyword() {
     let keyword = document.getElementById('keywordInput').value.trim();
     if (!keyword) keyword = "trending";
@@ -109,10 +128,7 @@ async function scrapeByKeyword() {
 
         while (countFetched < limit) {
             const targetUrl = `https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}&count=50&cursor=${cursor}`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-            
-            const res = await fetch(proxyUrl);
-            const json = await res.json();
+            const json = await fetchWithFallback(targetUrl);
 
             if (json && json.data && json.data.videos && json.data.videos.length > 0) {
                 for (const vid of json.data.videos) {
@@ -153,15 +169,12 @@ async function startExtraction() {
         return;
     }
 
-    document.getElementById('outputArea').value = "লিংক প্রসেস হচ্ছে...";
+    document.getElementById('outputArea').value = `মোট ${urls.length} টি লিংক প্রসেস হচ্ছে... অপেক্ষা করুন।`;
 
     for (let i = 0; i < urls.length; i++) {
         try {
             const targetUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(urls[i])}`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-            
-            const res = await fetch(proxyUrl);
-            const json = await res.json();
+            const json = await fetchWithFallback(targetUrl);
 
             if (json && json.data) {
                 const username = json.data.author?.unique_id || 'user';
@@ -169,7 +182,7 @@ async function startExtraction() {
                 extractedResults.add(shareUrl);
             }
         } catch (e) {
-            console.error(e);
+            console.error("Skipped link:", urls[i]);
         }
         renderOutput();
     }
