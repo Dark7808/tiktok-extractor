@@ -109,8 +109,10 @@ async function scrapeByKeyword() {
         extractedResults.clear();
 
         while (countFetched < limit) {
-            const feedUrl = `https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}&count=50&cursor=${cursor}`;
-            const res = await fetch(feedUrl);
+            const targetUrl = `https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}&count=50&cursor=${cursor}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+            
+            const res = await fetch(proxyUrl);
             const json = await res.json();
 
             if (json && json.data && json.data.videos && json.data.videos.length > 0) {
@@ -129,6 +131,11 @@ async function scrapeByKeyword() {
         }
 
         renderOutput();
+        if(extractedResults.size === 0) {
+            alert("কোনো ভিডিও পাওয়া যায়নি, অন্য কিওয়ার্ড দিয়ে চেষ্টা করুন।");
+        }
+    } {
+        // catch block handled
     } catch (e) {
         alert("ত্রুটি হয়েছে: " + e.message);
     }
@@ -153,8 +160,10 @@ async function startExtraction() {
 
     for (let i = 0; i < urls.length; i++) {
         try {
-            const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(urls[i])}`;
-            const res = await fetch(apiEndpoint);
+            const targetUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(urls[i])}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+            
+            const res = await fetch(proxyUrl);
             const json = await res.json();
 
             if (json && json.data) {
