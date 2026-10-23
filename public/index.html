@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 TikTok Ultimate Extractor & Scraper</title>
+    <title>TikTok Share Link Extractor</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -19,34 +19,26 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; gap: 15px; }
+        .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 15px; }
         
         .header { text-align: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
-        .header h1 { font-size: 22px; color: var(--text-main); }
+        .header h1 { font-size: 20px; color: var(--text-main); }
         .header h1 span { color: var(--accent-color); font-weight: 800; }
 
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .card h2 { font-size: 16px; margin-bottom: 12px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        .card h2 { font-size: 15px; margin-bottom: 10px; color: var(--text-main); }
 
         textarea, input[type="text"] { width: 100%; padding: 12px; background: #0b1120; color: #38bdf8; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 13px; margin-bottom: 12px; outline: none; }
         textarea { height: 110px; resize: vertical; }
         textarea:focus, input[type="text"]:focus { border-color: var(--accent-color); }
 
-        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .controls-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
         .control-item { display: flex; flex-direction: column; gap: 5px; }
         .control-item label { font-size: 12px; color: var(--text-sub); font-weight: 600; }
         select { padding: 9px; border-radius: 6px; border: 1px solid var(--border-color); background: #0b1120; color: #fff; font-size: 13px; outline: none; }
 
-        .btn-main { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s ease; width: 100%; }
+        .btn-main { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s ease; width: 100%; }
         .btn-main:hover { background: var(--accent-hover); }
-        .btn-main:disabled { background: #475569; cursor: not-allowed; }
-
-        .progress-section { margin-top: 12px; display: none; }
-        .progress-bar-container { width: 100%; height: 6px; background: #0b1120; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
-        .progress-bar { height: 100%; width: 0%; background: var(--accent-color); transition: width 0.3s; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #0b1120; padding: 10px; border-radius: 8px; text-align: center; font-size: 11px; }
-        .stat-val { font-size: 14px; font-weight: bold; margin-top: 2px; }
 
         .output-textarea { height: 260px; color: var(--success); }
         .btn-group { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
@@ -59,52 +51,39 @@
 
 <div class="container">
     <div class="header">
-        <h1>📦 TikTok Ultimate Extractor <span>TURBO</span></h1>
+        <h1>🔗 TikTok Share Link Extractor</h1>
     </div>
 
-    <!-- Mode 1: Category / Hashtag Scraper -->
+    <!-- Mode 1: Keyword/Category Search -->
     <div class="card">
-        <h2>🔥 ক্যাটেগরি বা হ্যাশট্যাগ দিয়ে ভিডিও খুঁজুন (For You / Explore)</h2>
-        <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">লিংক কাজ না করলে এখান থেকে সরাসরি কিওয়ার্ড দিয়ে ট্রেন্ডিং ভিডিও বের করুন।</div>
-        <input type="text" id="keywordInput" placeholder="যেমন: trending, foryou, viral, funny, bangla">
+        <h2>🔥 ক্যাটেগরি বা কিওয়ার্ড থেকে লিংক সংগ্রহ করুন</h2>
+        <input type="text" id="keywordInput" placeholder="যেমন: trending, foryou, viral, funny">
         
         <div class="controls-grid">
             <div class="control-item">
-                <label>কতগুলো ভিডিও বের করবেন?</label>
+                <label>কয়টি ভিডিওর লিংক চাচ্ছেন?</label>
                 <select id="keywordLimit">
-                    <option value="30">৩০ টি ভিডিও</option>
-                    <option value="50" selected>৫০ টি ভিডিও</option>
-                    <option value="100">১০০ টি ভিডিও</option>
-                    <option value="500">৫০০ টি ভিডিও</option>
+                    <option value="30">৩০ টি</option>
+                    <option value="50" selected>৫০ টি</option>
+                    <option value="100">১০০ টি</option>
+                    <option value="500">৫০০ টি</option>
                 </select>
             </div>
         </div>
-        <button class="btn-main" onclick="scrapeByKeyword()">🔍 ক্যাটেগরি থেকে ভিডিও বের করুন</button>
+        <button class="btn-main" onclick="scrapeByKeyword()">🔍 শেয়ার লিংক এক্সট্র্যাক্ট করুন</button>
     </div>
 
-    <!-- Mode 2: Link Input -->
+    <!-- Mode 2: Single/Bulk Link Resolver -->
     <div class="card">
-        <h2>📥 লিংক ইনপুট (Auto-Discover TikTok Links)</h2>
-        <textarea id="rawInput" placeholder="অথবা এখানে টিকটক ভিডিও লিংক দিন..."></textarea>
-        <button id="startBtn" class="btn-main" onclick="startExtraction()">🚀 লিংক থেকে এক্সট্র্যাক্ট করুন</button>
-
-        <div id="progressSection" class="progress-section">
-            <div class="progress-bar-container">
-                <div id="progressBar" class="progress-bar"></div>
-            </div>
-            <div class="stats-grid">
-                <div>সফল<div id="statSuccess" class="stat-val" style="color:var(--success);">0</div></div>
-                <div>স্কিপ<div id="statSkip" class="stat-val" style="color:#f59e0b;">0</div></div>
-                <div>এরর<div id="statError" class="stat-val" style="color:var(--error);">0</div></div>
-                <div>⚡ রেট<div id="statRate" class="stat-val" style="color:#a855f7;">0/s</div></div>
-            </div>
-        </div>
+        <h2>📥 শর্ট লিংক বা ভিডিও লিংক পেস্ট করুন</h2>
+        <textarea id="rawInput" placeholder="এখানে টিকটক লিংক দিন... (যেমন: https://vt.tiktok.com/ZSgP1t5sM/)"></textarea>
+        <button class="btn-main" onclick="startExtraction()">🚀 লিংক কনভার্ট করুন</button>
     </div>
 
     <!-- Output Card -->
     <div class="card">
-        <h2>📤 আউটপুট <span style="font-size:12px; color:var(--text-sub);">মোট: <b id="outputCount" style="color:var(--success);">0</b></span></h2>
-        <textarea id="outputArea" class="output-textarea" readonly placeholder="ফলাফল এখানে চলে আসবে..."></textarea>
+        <h2>📤 আউটপুট শেয়ার লিংক <span style="font-size:12px; color:var(--text-sub);">মোট: <b id="outputCount" style="color:var(--success);">0</b></span></h2>
+        <textarea id="outputArea" class="output-textarea" readonly placeholder="শুধু টিকটক শেয়ার লিংক এখানে লাইন বাই লাইন দেখাবে..."></textarea>
         
         <div class="btn-group">
             <button class="btn-sec" onclick="copyOutput()">📋 কপি করুন</button>
@@ -122,7 +101,7 @@ async function scrapeByKeyword() {
     if (!keyword) keyword = "trending";
     const limit = parseInt(document.getElementById('keywordLimit').value);
 
-    document.getElementById('outputArea').value = "খোঁজা হচ্ছে... দয়া করে অপেক্ষা করুন।";
+    document.getElementById('outputArea').value = "লিংক সংগ্রহ করা হচ্ছে... অপেক্ষা করুন।";
     
     try {
         let cursor = 0;
@@ -150,9 +129,8 @@ async function scrapeByKeyword() {
         }
 
         renderOutput();
-        alert(`সফলভাবে ${extractedResults.size} টি ভিডিওর লিংক সংগ্রহ করা হয়েছে!`);
     } catch (e) {
-        alert("এরর হয়েছে: " + e.message);
+        alert("ত্রুটি হয়েছে: " + e.message);
     }
 }
 
@@ -171,8 +149,7 @@ async function startExtraction() {
         return;
     }
 
-    document.getElementById('progressSection').style.display = 'block';
-    let success = 0, skip = 0, error = 0;
+    document.getElementById('outputArea').value = "লিংক প্রসেস হচ্ছে...";
 
     for (let i = 0; i < urls.length; i++) {
         try {
@@ -183,22 +160,13 @@ async function startExtraction() {
             if (json && json.data) {
                 const username = json.data.author?.unique_id || 'user';
                 const shareUrl = `https://www.tiktok.com/@${username}/video/${json.data.id}`;
-                
-                if (!extractedResults.has(shareUrl)) {
-                    extractedResults.add(shareUrl);
-                    success++;
-                } else {
-                    skip++;
-                }
-            } else {
-                error++;
+                extractedResults.add(shareUrl);
             }
         } catch (e) {
-            error++;
+            console.error(e);
         }
         renderOutput();
     }
-    alert("এক্সট্র্যাক্ট সম্পন্ন হয়েছে!");
 }
 
 function renderOutput() {
@@ -212,7 +180,7 @@ function copyOutput() {
     if (!area.value) return alert("কপি করার কিছু নেই!");
     area.select();
     document.execCommand("copy");
-    alert("কপি করা হয়েছে!");
+    alert("শেয়ার লিংকগুলো কপি করা হয়েছে!");
 }
 
 function downloadTxt() {
@@ -221,7 +189,7 @@ function downloadTxt() {
     const blob = new Blob([area.value], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `tiktok_extracted_${Date.now()}.txt`;
+    a.download = `tiktok_share_links_${Date.now()}.txt`;
     a.click();
 }
 
@@ -231,7 +199,6 @@ function clearAll() {
     document.getElementById('rawInput').value = '';
     document.getElementById('outputArea').value = '';
     document.getElementById('outputCount').innerText = '0';
-    document.getElementById('progressSection').style.display = 'none';
 }
 </script>
 
