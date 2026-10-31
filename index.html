@@ -1,225 +1,632 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Share Link Extractor</title>
+    <title>CV Editor - With Profile Image</title>
+    <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-color: #fe2c55;
-            --accent-hover: #e02447;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border-color: #334155;
-            --success: #22c55e;
-            --error: #ef4444;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 15px; }
-        
-        .header { text-align: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
-        .header h1 { font-size: 20px; color: var(--text-main); }
+        body {
+            background: #7f8c8d;
+            font-family: 'Times New Roman', Times, serif;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
 
-        .card { background: var(--card-bg); border-radius: 12px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .card h2 { font-size: 15px; margin-bottom: 10px; color: var(--text-main); }
+        .button-container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
 
-        textarea, input[type="text"] { width: 100%; padding: 12px; background: #0b1120; color: #38bdf8; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 13px; margin-bottom: 12px; outline: none; }
-        textarea { height: 110px; resize: vertical; }
-        textarea:focus, input[type="text"]:focus { border-color: var(--accent-color); }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-family: 'Times New Roman', serif;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
 
-        .controls-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
-        .control-item { display: flex; flex-direction: column; gap: 5px; }
-        .control-item label { font-size: 12px; color: var(--text-sub); font-weight: 600; }
-        select { padding: 9px; border-radius: 6px; border: 1px solid var(--border-color); background: #0b1120; color: #fff; font-size: 13px; outline: none; }
+        .btn-print { background: #2c3e50; color: white; }
+        .btn-pdf { background: #c0392b; color: white; }
+        .btn-edit { background: #f39c12; color: white; }
 
-        .btn-main { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s ease; width: 100%; }
-        .btn-main:hover { background: var(--accent-hover); }
+        .btn:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
 
-        .output-textarea { height: 260px; color: var(--success); }
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .btn-sec { flex: 1; min-width: 100px; background: #2563eb; color: #fff; border: none; padding: 9px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; }
-        .btn-sec:hover { background: #1d4ed8; }
-        .btn-clear { background: #475569; }
+        .cv-container {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cv-card {
+            background: white;
+            padding: 45px 40px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000;
+        }
+
+        /* Header with photo */
+        .cv-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        .cv-header-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        .cv-header-title h1 {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #000;
+            display: inline-block;
+            padding-bottom: 5px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* Profile Photo */
+        .cv-photo-box {
+            width: 130px;
+            height: 150px;
+            border: 1.5px solid #000;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cv-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .cv-photo-placeholder {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            padding: 5px;
+            font-style: italic;
+        }
+
+        /* Spacer to balance header (left side) */
+        .cv-header-spacer {
+            width: 130px;
+            flex-shrink: 0;
+        }
+
+        .cv-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .cv-label {
+            font-weight: bold;
+            width: 180px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .cv-label:after {
+            content: ":";
+            margin-left: 3px;
+        }
+
+        .cv-value {
+            flex: 1;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        hr {
+            margin: 25px 0 20px 0;
+            border: 0.5px solid #ccc;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 280px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 30px;
+            padding-top: 5px;
+            font-style: italic;
+            font-size: 15px;
+        }
+
+        .edit-panel {
+            max-width: 800px;
+            width: 100%;
+            margin-top: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .edit-panel.show { display: block; }
+
+        .edit-panel h3 {
+            font-family: 'Times New Roman', serif;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-left: 4px solid #f39c12;
+            padding-left: 12px;
+        }
+
+        .edit-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .edit-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .edit-group label {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #555;
+        }
+
+        .edit-group input, .edit-group textarea, .edit-group select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+        }
+
+        .edit-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .img-preview-small {
+            margin-top: 6px;
+            width: 80px;
+            height: 95px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .button-container, .edit-panel {
+                display: none;
+            }
+            .cv-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            .cv-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .cv-header {
+                flex-direction: column;
+            }
+            .cv-header-spacer {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>🔗 TikTok Share Link Extractor</h1>
-    </div>
+<div class="button-container">
+    <button class="btn btn-edit" id="editBtn"><i class="fas fa-edit"></i> Edit / Change Information</button>
+    <button class="btn btn-print" onclick="window.print();"><i class="fas fa-print"></i> Print / Save as PDF</button>
+    <button class="btn btn-pdf" id="pdfBtn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+</div>
 
-    <!-- Mode 1: Keyword Search -->
-    <div class="card">
-        <h2>🔥 ক্যাটেগরি বা কিওয়ার্ড থেকে লিংক সংগ্রহ করুন</h2>
-        <input type="text" id="keywordInput" placeholder="যেমন: trending, foryou, viral, funny">
-        
-        <div class="controls-grid">
-            <div class="control-item">
-                <label>কয়টি ভিডিওর লিংক চাচ্ছেন?</label>
-                <select id="keywordLimit">
-                    <option value="30">৩০ টি</option>
-                    <option value="50" selected>৫০ টি</option>
-                    <option value="100">১০০ টি</option>
-                </select>
+<!-- CV Card with Photo -->
+<div class="cv-container" id="cvContainer">
+    <div class="cv-card" id="cvCard">
+
+        <!-- Header with photo (photo on right side like standard CV) -->
+        <div class="cv-header">
+            <div class="cv-header-spacer"></div>
+            <div class="cv-header-title">
+                <h1>Curriculum Vitae</h1>
+            </div>
+            <div class="cv-photo-box">
+                <img id="displayPhoto" src="" alt="Profile Photo" style="display:none;">
+                <div class="cv-photo-placeholder" id="photoPlaceholder">Photo<br>(Not Added)</div>
             </div>
         </div>
-        <button class="btn-main" onclick="scrapeByKeyword()">🔍 শেয়ার লিংক এক্সট্র্যাক্ট করুন</button>
-    </div>
 
-    <!-- Mode 2: Link Resolver -->
-    <div class="card">
-        <h2>📥 শর্ট লিংক বা ভিডিও লিংক পেস্ট করুন</h2>
-        <textarea id="rawInput" placeholder="এখানে টিকটক লিংক দিন... (একাধিক লিংক একসাথে পেস্ট করতে পারেন)"></textarea>
-        <button class="btn-main" onclick="startExtraction()">🚀 লিংক কনভার্ট করুন</button>
-    </div>
+        <div class="cv-row">
+            <div class="cv-label">Name</div>
+            <div class="cv-value" id="displayName">Rehana Akter</div>
+        </div>
 
-    <!-- Output Card -->
-    <div class="card">
-        <h2>📤 আউটপুট শেয়ার লিংক <span style="font-size:12px; color:var(--text-sub);">মোট: <b id="outputCount" style="color:var(--success);">0</b></span></h2>
-        <textarea id="outputArea" class="output-textarea" readonly placeholder="শুধু টিকটক শেয়ার লিংক এখানে লাইন বাই লাইন দেখাবে..."></textarea>
-        
-        <div class="btn-group">
-            <button class="btn-sec" onclick="copyOutput()">📋 কপি করুন</button>
-            <button class="btn-sec" onclick="downloadTxt()">📄 Download TXT</button>
-            <button class="btn-sec btn-clear" onclick="clearAll()">🗑️ ক্লিয়ার</button>
+        <div class="cv-row">
+            <div class="cv-label">Father's Name</div>
+            <div class="cv-value" id="displayFather">Afjal Mia</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Mother's Name</div>
+            <div class="cv-value" id="displayMother">Jamana Khatun</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Present Address</div>
+            <div class="cv-value" id="displayPresent">Abdul Mojid Charang Bari, Chotopool, Agrabad, Halishahar, District- Chittagong.</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Permanent Address</div>
+            <div class="cv-value" id="displayPermanent">Vill: Lautoli, P.O: Chamir Munsir Hat, P.S: Begumgonj, Dist: Noakhali</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Date of Birth</div>
+            <div class="cv-value" id="displayDob">25th October, 1992</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Nationality</div>
+            <div class="cv-value" id="displayNationality">Bangladeshi by Birth</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Marital Status</div>
+            <div class="cv-value" id="displayMarital">Married</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Religion</div>
+            <div class="cv-value" id="displayReligion">Islam</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Gender</div>
+            <div class="cv-value" id="displayGender">Male</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Mobile No.</div>
+            <div class="cv-value" id="displayMobile">01866-109738</div>
+        </div>
+
+        <div class="cv-row">
+            <div class="cv-label">Educational Qualification</div>
+            <div class="cv-value" id="displayEducation">Eight Pass</div>
+        </div>
+
+        <hr>
+
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line" id="displaySignature">
+                    Signature: Rehana Akter
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Edit Panel -->
+<div class="edit-panel" id="editPanel">
+    <h3><i class="fas fa-pen-alt"></i> Edit All Information</h3>
+
+    <!-- Photo Section -->
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>📷 Profile Photo (Upload from computer)</label>
+            <input type="file" id="editPhotoUpload" accept="image/*">
+            <img id="editPhotoPreview" class="img-preview-small" alt="Preview">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>🖼️ OR Paste Image URL</label>
+            <input type="text" id="editPhotoUrl" placeholder="https://example.com/photo.jpg">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Full Name</label>
+            <input type="text" id="editName" value="Rehana Akter">
+        </div>
+        <div class="edit-group">
+            <label>Father's Name</label>
+            <input type="text" id="editFather" value="Afjal Mia">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Mother's Name</label>
+            <input type="text" id="editMother" value="Jamana Khatun">
+        </div>
+        <div class="edit-group">
+            <label>Date of Birth</label>
+            <input type="text" id="editDob" value="25th October, 1992">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>Present Address</label>
+            <textarea id="editPresent">Abdul Mojid Charang Bari, Chotopool, Agrabad, Halishahar, District- Chittagong.</textarea>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>Permanent Address</label>
+            <textarea id="editPermanent">Vill: Lautoli, P.O: Chamir Munsir Hat, P.S: Begumgonj, Dist: Noakhali</textarea>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Nationality</label>
+            <input type="text" id="editNationality" value="Bangladeshi by Birth">
+        </div>
+        <div class="edit-group">
+            <label>Marital Status</label>
+            <select id="editMarital">
+                <option value="Married" selected>Married</option>
+                <option value="Unmarried">Unmarried</option>
+                <option value="Divorced">Divorced</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Religion</label>
+            <input type="text" id="editReligion" value="Islam">
+        </div>
+        <div class="edit-group">
+            <label>Gender</label>
+            <select id="editGender">
+                <option value="Male" selected>Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Mobile No.</label>
+            <input type="text" id="editMobile" value="01866-109738">
+        </div>
+        <div class="edit-group">
+            <label>Educational Qualification</label>
+            <input type="text" id="editEducation" value="Eight Pass">
+        </div>
+    </div>
+
+    <button class="save-btn" id="saveBtn"><i class="fas fa-save"></i> Apply Changes & Update CV</button>
+</div>
+
 <script>
-let extractedResults = new Set();
+    // Display elements
+    const displayName = document.getElementById('displayName');
+    const displayFather = document.getElementById('displayFather');
+    const displayMother = document.getElementById('displayMother');
+    const displayPresent = document.getElementById('displayPresent');
+    const displayPermanent = document.getElementById('displayPermanent');
+    const displayDob = document.getElementById('displayDob');
+    const displayNationality = document.getElementById('displayNationality');
+    const displayMarital = document.getElementById('displayMarital');
+    const displayReligion = document.getElementById('displayReligion');
+    const displayGender = document.getElementById('displayGender');
+    const displayMobile = document.getElementById('displayMobile');
+    const displayEducation = document.getElementById('displayEducation');
+    const displaySignature = document.getElementById('displaySignature');
+    const displayPhoto = document.getElementById('displayPhoto');
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
 
-async function fetchWithFallback(targetUrl) {
-    const proxies = [
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
-    ];
+    // Edit inputs
+    const editName = document.getElementById('editName');
+    const editFather = document.getElementById('editFather');
+    const editMother = document.getElementById('editMother');
+    const editPresent = document.getElementById('editPresent');
+    const editPermanent = document.getElementById('editPermanent');
+    const editDob = document.getElementById('editDob');
+    const editNationality = document.getElementById('editNationality');
+    const editMarital = document.getElementById('editMarital');
+    const editReligion = document.getElementById('editReligion');
+    const editGender = document.getElementById('editGender');
+    const editMobile = document.getElementById('editMobile');
+    const editEducation = document.getElementById('editEducation');
+    const editPhotoUpload = document.getElementById('editPhotoUpload');
+    const editPhotoUrl = document.getElementById('editPhotoUrl');
+    const editPhotoPreview = document.getElementById('editPhotoPreview');
 
-    for (const proxyUrl of proxies) {
-        try {
-            const res = await fetch(proxyUrl);
-            if (res.ok) {
-                const json = await res.json();
-                return json;
+    // Store current photo data (base64 or URL)
+    let currentPhotoSrc = '';
+
+    // Function to set photo in CV
+    function setCVPhoto(src) {
+        if (src && src.trim() !== '') {
+            displayPhoto.src = src;
+            displayPhoto.style.display = 'block';
+            photoPlaceholder.style.display = 'none';
+            currentPhotoSrc = src;
+        } else {
+            displayPhoto.style.display = 'none';
+            photoPlaceholder.style.display = 'block';
+            currentPhotoSrc = '';
+        }
+    }
+
+    // File upload handler
+    editPhotoUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const base64 = ev.target.result;
+                setCVPhoto(base64);
+                editPhotoPreview.src = base64;
+                editPhotoPreview.style.display = 'block';
+                editPhotoUrl.value = ''; // clear URL field
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // URL handler (preview)
+    editPhotoUrl.addEventListener('input', function() {
+        const url = editPhotoUrl.value.trim();
+        if (url) {
+            setCVPhoto(url);
+            editPhotoPreview.src = url;
+            editPhotoPreview.style.display = 'block';
+        } else {
+            editPhotoPreview.style.display = 'none';
+        }
+    });
+
+    function updateCV() {
+        displayName.innerText = editName.value || "—";
+        displayFather.innerText = editFather.value || "—";
+        displayMother.innerText = editMother.value || "—";
+        displayPresent.innerText = editPresent.value || "—";
+        displayPermanent.innerText = editPermanent.value || "—";
+        displayDob.innerText = editDob.value || "—";
+        displayNationality.innerText = editNationality.value || "—";
+        displayMarital.innerText = editMarital.value;
+        displayReligion.innerText = editReligion.value || "—";
+        displayGender.innerText = editGender.value;
+        displayMobile.innerText = editMobile.value || "—";
+        displayEducation.innerText = editEducation.value || "—";
+        displaySignature.innerText = `Signature: ${editName.value || "Rehana Akter"}`;
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', function() {
+        updateCV();
+        document.getElementById('editPanel').classList.remove('show');
+    });
+
+    document.getElementById('editBtn').addEventListener('click', function() {
+        document.getElementById('editPanel').classList.toggle('show');
+        editName.value = displayName.innerText;
+        editFather.value = displayFather.innerText;
+        editMother.value = displayMother.innerText;
+        editPresent.value = displayPresent.innerText;
+        editPermanent.value = displayPermanent.innerText;
+        editDob.value = displayDob.innerText;
+        editNationality.value = displayNationality.innerText;
+        editMarital.value = displayMarital.innerText;
+        editReligion.value = displayReligion.innerText;
+        editGender.value = displayGender.innerText;
+        editMobile.value = displayMobile.innerText;
+        editEducation.value = displayEducation.innerText;
+
+        // Load current photo into preview
+        if (currentPhotoSrc) {
+            editPhotoPreview.src = currentPhotoSrc;
+            editPhotoPreview.style.display = 'block';
+            if (currentPhotoSrc.startsWith('http')) {
+                editPhotoUrl.value = currentPhotoSrc;
             }
-        } catch (e) {
-            // try next proxy
         }
-    }
-    return null;
-}
+    });
 
-async function scrapeByKeyword() {
-    let keyword = document.getElementById('keywordInput').value.trim();
-    if (!keyword) keyword = "trending";
-    const limit = parseInt(document.getElementById('keywordLimit').value);
-
-    document.getElementById('outputArea').value = "লিংক সংগ্রহ করা হচ্ছে... অপেক্ষা করুন।";
-    
-    try {
-        let cursor = 0;
-        let countFetched = 0;
-        extractedResults.clear();
-
-        while (countFetched < limit) {
-            const targetUrl = `https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}&count=50&cursor=${cursor}`;
-            const json = await fetchWithFallback(targetUrl);
-
-            if (json && json.data && json.data.videos && json.data.videos.length > 0) {
-                for (const vid of json.data.videos) {
-                    if (vid.author && vid.author.unique_id && vid.video_id) {
-                        const shareUrl = `https://www.tiktok.com/@${vid.author.unique_id}/video/${vid.video_id}`;
-                        extractedResults.add(shareUrl);
-                        countFetched++;
-                        if (countFetched >= limit) break;
-                    }
-                }
-                cursor += 50;
-            } else {
-                break;
-            }
-        }
-
-        renderOutput();
-        if (extractedResults.size === 0) {
-            alert("কোনো ভিডিও পাওয়া যায়নি, অন্য কিওয়ার্ড দিয়ে চেষ্টা করুন।");
-        }
-    } catch (e) {
-        alert("ত্রুটি হয়েছে: " + e.message);
-    }
-}
-
-function extractUrls(text) {
-    const pattern = /(https?:\/\/(?:www\.|vt\.|vm\.|t\.)?tiktok\.com\/[^\s"'>]+)/gi;
-    const matches = text.match(pattern) || [];
-    return Array.from(new Set(matches.map(u => u.replace(/[;,.>)]+$/, ''))));
-}
-
-async function startExtraction() {
-    const rawText = document.getElementById('rawInput').value;
-    const urls = extractUrls(rawText);
-
-    if (urls.length === 0) {
-        alert("কোনো সঠিক টিকটক লিংক পাওয়া যায়নি!");
-        return;
-    }
-
-    document.getElementById('outputArea').value = `মোট ${urls.length} টি লিংক প্রসেস হচ্ছে... অপেক্ষা করুন।`;
-
-    for (let i = 0; i < urls.length; i++) {
-        try {
-            const targetUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(urls[i])}`;
-            const json = await fetchWithFallback(targetUrl);
-
-            if (json && json.data) {
-                const username = json.data.author?.unique_id || 'user';
-                const shareUrl = `https://www.tiktok.com/@${username}/video/${json.data.id}`;
-                extractedResults.add(shareUrl);
-            }
-        } catch (e) {
-            console.error("Skipped link:", urls[i]);
-        }
-        renderOutput();
-    }
-}
-
-function renderOutput() {
-    const arr = Array.from(extractedResults);
-    document.getElementById('outputArea').value = arr.join('\n');
-    document.getElementById('outputCount').innerText = arr.length;
-}
-
-function copyOutput() {
-    const area = document.getElementById('outputArea');
-    if (!area.value) return alert("কপি করার কিছু নেই!");
-    area.select();
-    document.execCommand("copy");
-    alert("শেয়ার লিংকগুলো কপি করা হয়েছে!");
-}
-
-function downloadTxt() {
-    const area = document.getElementById('outputArea');
-    if (!area.value) return alert("ডাউনলোড করার মতো কিছু নেই!");
-    const blob = new Blob([area.value], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `tiktok_share_links_${Date.now()}.txt`;
-    a.click();
-}
-
-function clearAll() {
-    extractedResults.clear();
-    document.getElementById('keywordInput').value = '';
-    document.getElementById('rawInput').value = '';
-    document.getElementById('outputArea').value = '';
-    document.getElementById('outputCount').innerText = '0';
-}
+    // PDF with image support
+    document.getElementById('pdfBtn').addEventListener('click', function() {
+        updateCV();
+        setTimeout(() => {
+            const element = document.getElementById('cvContainer');
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `${displayName.innerText || 'Biodata'}_Curriculum_Vitae.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    letterRendering: true,
+                    useCORS: true,
+                    allowTaint: true
+                },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }, 200);
+    });
 </script>
-
 </body>
 </html>
