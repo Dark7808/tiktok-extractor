@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Editor - With Profile Image</title>
+    <title>CV Editor - Rehana Akter Style</title>
     <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -49,9 +49,20 @@
             font-size: 16px;
         }
 
-        .btn-print { background: #2c3e50; color: white; }
-        .btn-pdf { background: #c0392b; color: white; }
-        .btn-edit { background: #f39c12; color: white; }
+        .btn-print {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn-pdf {
+            background: #c0392b;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
 
         .btn:hover {
             transform: scale(1.02);
@@ -75,21 +86,12 @@
             color: #000;
         }
 
-        /* Header with photo */
         .cv-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            gap: 20px;
-        }
-
-        .cv-header-title {
-            flex: 1;
             text-align: center;
+            margin-bottom: 30px;
         }
 
-        .cv-header-title h1 {
+        .cv-header h1 {
             font-size: 24px;
             font-weight: bold;
             text-transform: uppercase;
@@ -98,40 +100,6 @@
             display: inline-block;
             padding-bottom: 5px;
             font-family: 'Times New Roman', Times, serif;
-        }
-
-        /* Profile Photo */
-        .cv-photo-box {
-            width: 130px;
-            height: 150px;
-            border: 1.5px solid #000;
-            overflow: hidden;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .cv-photo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .cv-photo-placeholder {
-            font-size: 12px;
-            color: #888;
-            text-align: center;
-            padding: 5px;
-            font-style: italic;
-        }
-
-        /* Spacer to balance header (left side) */
-        .cv-header-spacer {
-            width: 130px;
-            flex-shrink: 0;
         }
 
         .cv-row {
@@ -192,7 +160,9 @@
             display: none;
         }
 
-        .edit-panel.show { display: block; }
+        .edit-panel.show {
+            display: block;
+        }
 
         .edit-panel h3 {
             font-family: 'Times New Roman', serif;
@@ -234,7 +204,9 @@
             min-height: 60px;
         }
 
-        .full-width { grid-column: span 2; }
+        .full-width {
+            grid-column: span 2;
+        }
 
         .save-btn {
             background: #27ae60;
@@ -246,15 +218,6 @@
             font-weight: bold;
             margin-top: 10px;
             width: 100%;
-        }
-
-        .img-preview-small {
-            margin-top: 6px;
-            width: 80px;
-            height: 95px;
-            object-fit: cover;
-            border: 1px solid #ccc;
-            display: none;
         }
 
         @media print {
@@ -274,15 +237,6 @@
                 padding: 20px;
             }
         }
-
-        @media (max-width: 600px) {
-            .cv-header {
-                flex-direction: column;
-            }
-            .cv-header-spacer {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -293,20 +247,11 @@
     <button class="btn btn-pdf" id="pdfBtn"><i class="fas fa-file-pdf"></i> Download PDF</button>
 </div>
 
-<!-- CV Card with Photo -->
+<!-- Main CV Card - Without NID and Blood Group -->
 <div class="cv-container" id="cvContainer">
     <div class="cv-card" id="cvCard">
-
-        <!-- Header with photo (photo on right side like standard CV) -->
         <div class="cv-header">
-            <div class="cv-header-spacer"></div>
-            <div class="cv-header-title">
-                <h1>Curriculum Vitae</h1>
-            </div>
-            <div class="cv-photo-box">
-                <img id="displayPhoto" src="" alt="Profile Photo" style="display:none;">
-                <div class="cv-photo-placeholder" id="photoPlaceholder">Photo<br>(Not Added)</div>
-            </div>
+            <h1>Curriculum Vitae</h1>
         </div>
 
         <div class="cv-row">
@@ -383,24 +328,8 @@
 
 <!-- Edit Panel -->
 <div class="edit-panel" id="editPanel">
-    <h3><i class="fas fa-pen-alt"></i> Edit All Information</h3>
-
-    <!-- Photo Section -->
-    <div class="edit-row">
-        <div class="edit-group full-width">
-            <label>📷 Profile Photo (Upload from computer)</label>
-            <input type="file" id="editPhotoUpload" accept="image/*">
-            <img id="editPhotoPreview" class="img-preview-small" alt="Preview">
-        </div>
-    </div>
-
-    <div class="edit-row">
-        <div class="edit-group full-width">
-            <label>🖼️ OR Paste Image URL</label>
-            <input type="text" id="editPhotoUrl" placeholder="https://example.com/photo.jpg">
-        </div>
-    </div>
-
+    <h3><i class="fas fa-pen-alt"></i> Edit All Information (Change anything you want)</h3>
+    
     <div class="edit-row">
         <div class="edit-group">
             <label>Full Name</label>
@@ -496,10 +425,8 @@
     const displayMobile = document.getElementById('displayMobile');
     const displayEducation = document.getElementById('displayEducation');
     const displaySignature = document.getElementById('displaySignature');
-    const displayPhoto = document.getElementById('displayPhoto');
-    const photoPlaceholder = document.getElementById('photoPlaceholder');
 
-    // Edit inputs
+    // Edit input elements
     const editName = document.getElementById('editName');
     const editFather = document.getElementById('editFather');
     const editMother = document.getElementById('editMother');
@@ -512,54 +439,6 @@
     const editGender = document.getElementById('editGender');
     const editMobile = document.getElementById('editMobile');
     const editEducation = document.getElementById('editEducation');
-    const editPhotoUpload = document.getElementById('editPhotoUpload');
-    const editPhotoUrl = document.getElementById('editPhotoUrl');
-    const editPhotoPreview = document.getElementById('editPhotoPreview');
-
-    // Store current photo data (base64 or URL)
-    let currentPhotoSrc = '';
-
-    // Function to set photo in CV
-    function setCVPhoto(src) {
-        if (src && src.trim() !== '') {
-            displayPhoto.src = src;
-            displayPhoto.style.display = 'block';
-            photoPlaceholder.style.display = 'none';
-            currentPhotoSrc = src;
-        } else {
-            displayPhoto.style.display = 'none';
-            photoPlaceholder.style.display = 'block';
-            currentPhotoSrc = '';
-        }
-    }
-
-    // File upload handler
-    editPhotoUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                const base64 = ev.target.result;
-                setCVPhoto(base64);
-                editPhotoPreview.src = base64;
-                editPhotoPreview.style.display = 'block';
-                editPhotoUrl.value = ''; // clear URL field
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // URL handler (preview)
-    editPhotoUrl.addEventListener('input', function() {
-        const url = editPhotoUrl.value.trim();
-        if (url) {
-            setCVPhoto(url);
-            editPhotoPreview.src = url;
-            editPhotoPreview.style.display = 'block';
-        } else {
-            editPhotoPreview.style.display = 'none';
-        }
-    });
 
     function updateCV() {
         displayName.innerText = editName.value || "—";
@@ -596,18 +475,8 @@
         editGender.value = displayGender.innerText;
         editMobile.value = displayMobile.innerText;
         editEducation.value = displayEducation.innerText;
-
-        // Load current photo into preview
-        if (currentPhotoSrc) {
-            editPhotoPreview.src = currentPhotoSrc;
-            editPhotoPreview.style.display = 'block';
-            if (currentPhotoSrc.startsWith('http')) {
-                editPhotoUrl.value = currentPhotoSrc;
-            }
-        }
     });
 
-    // PDF with image support
     document.getElementById('pdfBtn').addEventListener('click', function() {
         updateCV();
         setTimeout(() => {
@@ -616,17 +485,14 @@
                 margin: [0.5, 0.5, 0.5, 0.5],
                 filename: `${displayName.innerText || 'Biodata'}_Curriculum_Vitae.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    letterRendering: true,
-                    useCORS: true,
-                    allowTaint: true
-                },
+                html2canvas: { scale: 2, letterRendering: true },
                 jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
             html2pdf().set(opt).from(element).save();
-        }, 200);
+        }, 150);
     });
+
+    updateCV();
 </script>
 </body>
 </html>
