@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curriculum Vitae - Rehana Akter</title>
+    <title>Curriculum Vitae - Editable</title>
     <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Georgia:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -20,117 +20,17 @@
             padding: 40px 20px;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
         }
 
-        /* CV Card - exactly like image */
-        .cv-card {
-            max-width: 800px;
-            width: 100%;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            padding: 40px 35px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        /* Header with line */
-        .cv-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .cv-header h1 {
-            font-size: 24px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #000;
-            border-bottom: 2px solid #000;
-            display: inline-block;
-            padding-bottom: 5px;
-            font-family: 'Georgia', serif;
-        }
-
-        /* Content styling - exactly like CV format */
-        .cv-content {
-            line-height: 1.6;
-        }
-
-        .cv-section {
-            margin-bottom: 15px;
-        }
-
-        .cv-line {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-
-        .cv-label {
-            font-weight: bold;
-            width: 160px;
-            position: relative;
-        }
-
-        .cv-label:after {
-            content: ":";
-            position: absolute;
-            right: 5px;
-        }
-
-        .cv-value {
-            flex: 1;
-            padding-left: 10px;
-        }
-
-        /* Address section special */
-        .address-block {
-            margin-bottom: 8px;
-        }
-
-        .address-label {
-            font-weight: bold;
-            display: inline-block;
-            width: 160px;
-        }
-
-        .address-label:after {
-            content: ":";
-            margin-left: 5px;
-        }
-
-        .address-text {
-            display: inline;
-        }
-
-        /* Signature section */
-        .signature-section {
-            margin-top: 40px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .signature-box {
-            text-align: center;
-            width: 250px;
-        }
-
-        .signature-line {
-            border-top: 1px solid #000;
-            margin-top: 30px;
-            padding-top: 5px;
-            font-style: italic;
-        }
-
-        /* Print button */
+        /* Button group */
         .btn-group {
             display: flex;
             gap: 15px;
             justify-content: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -157,26 +57,135 @@
             color: white;
         }
 
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+
         .btn:hover {
             transform: scale(1.02);
             opacity: 0.9;
         }
 
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            .btn-group {
-                display: none;
-            }
-            .cv-card {
-                box-shadow: none;
-                padding: 20px;
-            }
+        /* CV Card */
+        .cv-card {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 40px 35px;
+            margin: 0 auto;
+            position: relative;
         }
 
-        /* Note for correction */
+        /* Header */
+        .cv-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .cv-header-spacer {
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .cv-header-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        .cv-header-title h1 {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #000;
+            border-bottom: 2px solid #000;
+            display: inline-block;
+            padding-bottom: 5px;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Photo box */
+        .cv-photo-box {
+            width: 120px;
+            height: 140px;
+            border: 1.5px solid #000;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cv-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-placeholder {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            padding: 5px;
+            font-style: italic;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Content */
+        .cv-content {
+            line-height: 1.6;
+        }
+
+        .cv-line {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .cv-label {
+            font-weight: bold;
+            width: 160px;
+            position: relative;
+        }
+
+        .cv-label:after {
+            content: ":";
+            position: absolute;
+            right: 5px;
+        }
+
+        .cv-value {
+            flex: 1;
+            padding-left: 10px;
+        }
+
+        /* Signature */
+        .signature-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 250px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 30px;
+            padding-top: 5px;
+            font-style: italic;
+        }
+
         .correction-note {
             background: #fef3c7;
             color: #92400e;
@@ -191,111 +200,343 @@
             margin: 15px 0;
             border: 0.5px solid #ccc;
         }
+
+        /* Edit Panel */
+        .edit-panel {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .edit-panel.show {
+            display: block;
+        }
+
+        .edit-panel h2 {
+            font-family: 'Georgia', serif;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-left: 5px solid #f39c12;
+            padding-left: 12px;
+            font-size: 1.3rem;
+        }
+
+        .edit-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .edit-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .edit-group.full-width {
+            grid-column: span 2;
+        }
+
+        .edit-group label {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #475569;
+            font-family: 'Georgia', serif;
+        }
+
+        .edit-group input,
+        .edit-group textarea,
+        .edit-group select {
+            padding: 9px 13px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Georgia', serif;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .edit-group input:focus,
+        .edit-group textarea:focus,
+        .edit-group select:focus {
+            outline: none;
+            border-color: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243,156,18,0.15);
+        }
+
+        .edit-group textarea {
+            resize: vertical;
+            min-height: 55px;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .save-btn:hover {
+            background: #219150;
+        }
+
+        .photo-preview-small {
+            margin-top: 8px;
+            width: 70px;
+            height: 85px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            display: none;
+            border-radius: 4px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .btn-group, .edit-panel {
+                display: none !important;
+            }
+            .cv-card {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .edit-row {
+                grid-template-columns: 1fr;
+            }
+            .edit-group.full-width {
+                grid-column: span 1;
+            }
+            .cv-header {
+                flex-direction: column;
+            }
+            .cv-header-spacer {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
-<div>
-    <div class="btn-group">
-        <button class="btn btn-print" onclick="window.print();"><i class="fas fa-print"></i> Print / Save as PDF</button>
-        <button class="btn btn-pdf" id="downloadPdfBtn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+
+<!-- Buttons -->
+<div class="btn-group">
+    <button class="btn btn-edit" id="editBtn"><i class="fas fa-edit"></i> Edit Information</button>
+    <button class="btn btn-print" onclick="window.print();"><i class="fas fa-print"></i> Print</button>
+    <button class="btn btn-pdf" id="downloadPdfBtn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+</div>
+
+<!-- Edit Panel -->
+<div class="edit-panel" id="editPanel">
+    <h2><i class="fas fa-pen"></i> Edit Your Information</h2>
+
+    <!-- Photo -->
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>📷 Upload Photo</label>
+            <input type="file" id="editPhotoUpload" accept="image/*">
+            <img id="editPhotoPreview" class="photo-preview-small" alt="Preview">
+        </div>
+        <div class="edit-group">
+            <label>🖼️ OR Paste Image URL</label>
+            <input type="text" id="editPhotoUrl" placeholder="https://example.com/photo.jpg">
+        </div>
     </div>
 
-    <div class="cv-card" id="cvCard">
-        <div class="cv-header">
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Name</label>
+            <input type="text" id="editName" value="Rehana Akter">
+        </div>
+        <div class="edit-group">
+            <label>Father's Name</label>
+            <input type="text" id="editFather" value="Afjal Mia">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Mother's Name</label>
+            <input type="text" id="editMother" value="Jamana Khatun">
+        </div>
+        <div class="edit-group">
+            <label>Date of Birth</label>
+            <input type="text" id="editDob" value="25th October, 1992">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>Present Address</label>
+            <textarea id="editPresent">Abdul Mojid Charang Bari, Chotopool, Agrabad, Halishahar, District- Chittagong.</textarea>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>Permanent Address</label>
+            <textarea id="editPermanent">Vill: Lautoli, P.O: Chamir Munsir Hat, P.S: Begumgonj, Dist: Noakhali</textarea>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Nationality</label>
+            <input type="text" id="editNationality" value="Bangladeshi by Birth">
+        </div>
+        <div class="edit-group">
+            <label>Marital Status</label>
+            <select id="editMarital">
+                <option value="Married" selected>Married</option>
+                <option value="Unmarried">Unmarried</option>
+                <option value="Divorced">Divorced</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Religion</label>
+            <input type="text" id="editReligion" value="Islam">
+        </div>
+        <div class="edit-group">
+            <label>Gender</label>
+            <select id="editGender">
+                <option value="Male" selected>Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group">
+            <label>Blood Group</label>
+            <input type="text" id="editBlood" value="B+">
+        </div>
+        <div class="edit-group">
+            <label>Mobile No.</label>
+            <input type="text" id="editMobile" value="01866-109738">
+        </div>
+    </div>
+
+    <div class="edit-row">
+        <div class="edit-group full-width">
+            <label>Educational Qualification</label>
+            <input type="text" id="editEducation" value="Eight Pass">
+        </div>
+    </div>
+
+    <div class="edit-actions">
+        <button class="save-btn" id="saveBtn"><i class="fas fa-check"></i> Apply Changes</button>
+    </div>
+</div>
+
+<!-- CV Card -->
+<div class="cv-card" id="cvCard">
+    <div class="cv-header">
+        <div class="cv-header-spacer"></div>
+        <div class="cv-header-title">
             <h1>Curriculum Vitae</h1>
         </div>
+        <div class="cv-photo-box">
+            <img id="displayPhoto" src="" alt="Profile" style="display:none;">
+            <div class="photo-placeholder" id="photoPlaceholder">Photo<br>(Not Added)</div>
+        </div>
+    </div>
 
-        <div class="cv-content">
-            <!-- Name -->
-            <div class="cv-line">
-                <div class="cv-label">Name</div>
-                <div class="cv-value">Rehana Akter</div>
-            </div>
+    <div class="cv-content">
+        <div class="cv-line">
+            <div class="cv-label">Name</div>
+            <div class="cv-value" id="displayName">Rehana Akter</div>
+        </div>
 
-            <!-- Father's Name -->
-            <div class="cv-line">
-                <div class="cv-label">Father's Name</div>
-                <div class="cv-value">Afjal Mia</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Father's Name</div>
+            <div class="cv-value" id="displayFather">Afjal Mia</div>
+        </div>
 
-            <!-- Mother's Name -->
-            <div class="cv-line">
-                <div class="cv-label">Mother's Name</div>
-                <div class="cv-value">Jamana Khatun</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Mother's Name</div>
+            <div class="cv-value" id="displayMother">Jamana Khatun</div>
+        </div>
 
-            <!-- Present Address -->
-            <div class="cv-line">
-                <div class="cv-label">Present Address</div>
-                <div class="cv-value">Abdul Mojid Charang Bari, Chotopool, Agrabad, Halishahar, District- Chittagong.</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Present Address</div>
+            <div class="cv-value" id="displayPresent">Abdul Mojid Charang Bari, Chotopool, Agrabad, Halishahar, District- Chittagong.</div>
+        </div>
 
-            <!-- Permanent Address -->
-            <div class="cv-line">
-                <div class="cv-label">Permanent Address</div>
-                <div class="cv-value">Vill: Lautoli, P.O: Chamir Munsir Hat, P.S: Begumgonj, Dist: Noakhali</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Permanent Address</div>
+            <div class="cv-value" id="displayPermanent">Vill: Lautoli, P.O: Chamir Munsir Hat, P.S: Begumgonj, Dist: Noakhali</div>
+        </div>
 
-            <!-- Date of Birth -->
-            <div class="cv-line">
-                <div class="cv-label">Date of Birth</div>
-                <div class="cv-value">25th October, 1992</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Date of Birth</div>
+            <div class="cv-value" id="displayDob">25th October, 1992</div>
+        </div>
 
-            <!-- Nationality -->
-            <div class="cv-line">
-                <div class="cv-label">Nationality</div>
-                <div class="cv-value">Bangladeshi by Birth</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Nationality</div>
+            <div class="cv-value" id="displayNationality">Bangladeshi by Birth</div>
+        </div>
 
-            <!-- Marital Status -->
-            <div class="cv-line">
-                <div class="cv-label">Marital Status</div>
-                <div class="cv-value">Married</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Marital Status</div>
+            <div class="cv-value" id="displayMarital">Married</div>
+        </div>
 
-            <!-- Religion -->
-            <div class="cv-line">
-                <div class="cv-label">Religion</div>
-                <div class="cv-value">Islam</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Religion</div>
+            <div class="cv-value" id="displayReligion">Islam</div>
+        </div>
 
-            <!-- Gender - as per image -->
-            <div class="cv-line">
-                <div class="cv-label">Gender</div>
-                <div class="cv-value">
-                    Male 
-                    <span class="correction-note"><i class="fas fa-info-circle"></i> As per original image</span>
-                </div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Gender</div>
+            <div class="cv-value" id="displayGender">Male</div>
+        </div>
 
-            <!-- Blood Group -->
-            <div class="cv-line">
-                <div class="cv-label">Blood Group</div>
-                <div class="cv-value">B+</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Blood Group</div>
+            <div class="cv-value" id="displayBlood">B+</div>
+        </div>
 
-            <!-- Mobile No -->
-            <div class="cv-line">
-                <div class="cv-label">Mobile No.</div>
-                <div class="cv-value">01866-109738</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Mobile No.</div>
+            <div class="cv-value" id="displayMobile">01866-109738</div>
+        </div>
 
-            <!-- Educational Qualification -->
-            <div class="cv-line">
-                <div class="cv-label">Educational Qualification</div>
-                <div class="cv-value">Eight Pass</div>
-            </div>
+        <div class="cv-line">
+            <div class="cv-label">Educational Qualification</div>
+            <div class="cv-value" id="displayEducation">Eight Pass</div>
+        </div>
 
-            <!-- Separator line like in image -->
-            <hr>
+        <hr>
 
-            <!-- Signature -->
-            <div class="signature-section">
-                <div class="signature-box">
-                    <div class="signature-line">
-                        Signature: Rehana Akter
-                    </div>
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line" id="displaySignature">
+                    Signature: Rehana Akter
                 </div>
             </div>
         </div>
@@ -303,16 +544,162 @@
 </div>
 
 <script>
-    document.getElementById('downloadPdfBtn').addEventListener('click', function() {
-        const element = document.getElementById('cvCard');
-        const opt = {
-            margin: [0.5, 0.5, 0.5, 0.5],
-            filename: 'Rehana_Akter_Curriculum_Vitae.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, letterRendering: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
+    // ===== Display elements =====
+    const displayName = document.getElementById('displayName');
+    const displayFather = document.getElementById('displayFather');
+    const displayMother = document.getElementById('displayMother');
+    const displayPresent = document.getElementById('displayPresent');
+    const displayPermanent = document.getElementById('displayPermanent');
+    const displayDob = document.getElementById('displayDob');
+    const displayNationality = document.getElementById('displayNationality');
+    const displayMarital = document.getElementById('displayMarital');
+    const displayReligion = document.getElementById('displayReligion');
+    const displayGender = document.getElementById('displayGender');
+    const displayBlood = document.getElementById('displayBlood');
+    const displayMobile = document.getElementById('displayMobile');
+    const displayEducation = document.getElementById('displayEducation');
+    const displaySignature = document.getElementById('displaySignature');
+    const displayPhoto = document.getElementById('displayPhoto');
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
+
+    // ===== Edit inputs =====
+    const editName = document.getElementById('editName');
+    const editFather = document.getElementById('editFather');
+    const editMother = document.getElementById('editMother');
+    const editPresent = document.getElementById('editPresent');
+    const editPermanent = document.getElementById('editPermanent');
+    const editDob = document.getElementById('editDob');
+    const editNationality = document.getElementById('editNationality');
+    const editMarital = document.getElementById('editMarital');
+    const editReligion = document.getElementById('editReligion');
+    const editGender = document.getElementById('editGender');
+    const editBlood = document.getElementById('editBlood');
+    const editMobile = document.getElementById('editMobile');
+    const editEducation = document.getElementById('editEducation');
+    const editPhotoUpload = document.getElementById('editPhotoUpload');
+    const editPhotoUrl = document.getElementById('editPhotoUrl');
+    const editPhotoPreview = document.getElementById('editPhotoPreview');
+
+    // Current photo source (base64 or URL)
+    let currentPhotoSrc = '';
+
+    // ===== Photo handling =====
+    function setCVPhoto(src) {
+        if (src && src.trim() !== '') {
+            displayPhoto.src = src;
+            displayPhoto.style.display = 'block';
+            photoPlaceholder.style.display = 'none';
+            currentPhotoSrc = src;
+        } else {
+            displayPhoto.style.display = 'none';
+            photoPlaceholder.style.display = 'block';
+            currentPhotoSrc = '';
+        }
+    }
+
+    // File upload
+    editPhotoUpload.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const base64 = ev.target.result;
+                setCVPhoto(base64);
+                editPhotoPreview.src = base64;
+                editPhotoPreview.style.display = 'block';
+                editPhotoUrl.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // URL input
+    editPhotoUrl.addEventListener('input', function () {
+        const url = editPhotoUrl.value.trim();
+        if (url) {
+            setCVPhoto(url);
+            editPhotoPreview.src = url;
+            editPhotoPreview.style.display = 'block';
+        } else {
+            editPhotoPreview.style.display = 'none';
+        }
+    });
+
+    // ===== Update CV from inputs =====
+    function updateCV() {
+        displayName.innerText = editName.value || '—';
+        displayFather.innerText = editFather.value || '—';
+        displayMother.innerText = editMother.value || '—';
+        displayPresent.innerText = editPresent.value || '—';
+        displayPermanent.innerText = editPermanent.value || '—';
+        displayDob.innerText = editDob.value || '—';
+        displayNationality.innerText = editNationality.value || '—';
+        displayMarital.innerText = editMarital.value;
+        displayReligion.innerText = editReligion.value || '—';
+        displayGender.innerText = editGender.value;
+        displayBlood.innerText = editBlood.value || '—';
+        displayMobile.innerText = editMobile.value || '—';
+        displayEducation.innerText = editEducation.value || '—';
+        displaySignature.innerText = 'Signature: ' + (editName.value || 'Rehana Akter');
+    }
+
+    // ===== Buttons =====
+    // Save / Apply
+    document.getElementById('saveBtn').addEventListener('click', function () {
+        updateCV();
+        document.getElementById('editPanel').classList.remove('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Toggle edit panel
+    document.getElementById('editBtn').addEventListener('click', function () {
+        const panel = document.getElementById('editPanel');
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            // Load current display values into edit inputs
+            editName.value = displayName.innerText;
+            editFather.value = displayFather.innerText;
+            editMother.value = displayMother.innerText;
+            editPresent.value = displayPresent.innerText;
+            editPermanent.value = displayPermanent.innerText;
+            editDob.value = displayDob.innerText;
+            editNationality.value = displayNationality.innerText;
+            editMarital.value = displayMarital.innerText;
+            editReligion.value = displayReligion.innerText;
+            editGender.value = displayGender.innerText;
+            editBlood.value = displayBlood.innerText;
+            editMobile.value = displayMobile.innerText;
+            editEducation.value = displayEducation.innerText;
+
+            if (currentPhotoSrc) {
+                editPhotoPreview.src = currentPhotoSrc;
+                editPhotoPreview.style.display = 'block';
+                if (currentPhotoSrc.startsWith('http')) {
+                    editPhotoUrl.value = currentPhotoSrc;
+                }
+            }
+        }
+    });
+
+    // PDF download
+    document.getElementById('downloadPdfBtn').addEventListener('click', function () {
+        updateCV();
+        setTimeout(function () {
+            const element = document.getElementById('cvCard');
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: (displayName.innerText || 'Biodata') + '_Curriculum_Vitae.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    letterRendering: true,
+                    useCORS: true,
+                    allowTaint: true
+                },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }, 200);
     });
 </script>
 </body>
