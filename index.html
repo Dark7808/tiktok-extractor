@@ -78,26 +78,13 @@
             position: relative;
         }
 
-        /* Header */
+        /* Header - Title Centered */
         .cv-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            gap: 20px;
-        }
-
-        .cv-header-spacer {
-            width: 120px;
-            flex-shrink: 0;
-        }
-
-        .cv-header-title {
-            flex: 1;
             text-align: center;
+            margin-bottom: 35px;
         }
 
-        .cv-header-title h1 {
+        .cv-header h1 {
             font-size: 24px;
             font-weight: bold;
             text-transform: uppercase;
@@ -106,35 +93,6 @@
             border-bottom: 2px solid #000;
             display: inline-block;
             padding-bottom: 5px;
-            font-family: 'Georgia', serif;
-        }
-
-        /* Photo box */
-        .cv-photo-box {
-            width: 120px;
-            height: 140px;
-            border: 1.5px solid #000;
-            overflow: hidden;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .cv-photo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .photo-placeholder {
-            font-size: 11px;
-            color: #888;
-            text-align: center;
-            padding: 5px;
-            font-style: italic;
             font-family: 'Georgia', serif;
         }
 
@@ -186,18 +144,8 @@
             font-style: italic;
         }
 
-        .correction-note {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 11px;
-            margin-top: 5px;
-            display: inline-block;
-        }
-
         hr {
-            margin: 15px 0;
+            margin: 20px 0;
             border: 0.5px solid #ccc;
         }
 
@@ -297,16 +245,6 @@
             background: #219150;
         }
 
-        .photo-preview-small {
-            margin-top: 8px;
-            width: 70px;
-            height: 85px;
-            object-fit: cover;
-            border: 1px solid #ccc;
-            display: none;
-            border-radius: 4px;
-        }
-
         @media print {
             body {
                 background: white;
@@ -328,12 +266,6 @@
             .edit-group.full-width {
                 grid-column: span 1;
             }
-            .cv-header {
-                flex-direction: column;
-            }
-            .cv-header-spacer {
-                display: none;
-            }
         }
     </style>
 </head>
@@ -349,19 +281,6 @@
 <!-- Edit Panel -->
 <div class="edit-panel" id="editPanel">
     <h2><i class="fas fa-pen"></i> Edit Your Information</h2>
-
-    <!-- Photo -->
-    <div class="edit-row">
-        <div class="edit-group">
-            <label>📷 Upload Photo</label>
-            <input type="file" id="editPhotoUpload" accept="image/*">
-            <img id="editPhotoPreview" class="photo-preview-small" alt="Preview">
-        </div>
-        <div class="edit-group">
-            <label>🖼️ OR Paste Image URL</label>
-            <input type="text" id="editPhotoUrl" placeholder="https://example.com/photo.jpg">
-        </div>
-    </div>
 
     <div class="edit-row">
         <div class="edit-group">
@@ -455,14 +374,7 @@
 <!-- CV Card -->
 <div class="cv-card" id="cvCard">
     <div class="cv-header">
-        <div class="cv-header-spacer"></div>
-        <div class="cv-header-title">
-            <h1>Curriculum Vitae</h1>
-        </div>
-        <div class="cv-photo-box">
-            <img id="displayPhoto" src="" alt="Profile" style="display:none;">
-            <div class="photo-placeholder" id="photoPlaceholder">Photo<br>(Not Added)</div>
-        </div>
+        <h1>Curriculum Vitae</h1>
     </div>
 
     <div class="cv-content">
@@ -559,8 +471,6 @@
     const displayMobile = document.getElementById('displayMobile');
     const displayEducation = document.getElementById('displayEducation');
     const displaySignature = document.getElementById('displaySignature');
-    const displayPhoto = document.getElementById('displayPhoto');
-    const photoPlaceholder = document.getElementById('photoPlaceholder');
 
     // ===== Edit inputs =====
     const editName = document.getElementById('editName');
@@ -576,54 +486,6 @@
     const editBlood = document.getElementById('editBlood');
     const editMobile = document.getElementById('editMobile');
     const editEducation = document.getElementById('editEducation');
-    const editPhotoUpload = document.getElementById('editPhotoUpload');
-    const editPhotoUrl = document.getElementById('editPhotoUrl');
-    const editPhotoPreview = document.getElementById('editPhotoPreview');
-
-    // Current photo source (base64 or URL)
-    let currentPhotoSrc = '';
-
-    // ===== Photo handling =====
-    function setCVPhoto(src) {
-        if (src && src.trim() !== '') {
-            displayPhoto.src = src;
-            displayPhoto.style.display = 'block';
-            photoPlaceholder.style.display = 'none';
-            currentPhotoSrc = src;
-        } else {
-            displayPhoto.style.display = 'none';
-            photoPlaceholder.style.display = 'block';
-            currentPhotoSrc = '';
-        }
-    }
-
-    // File upload
-    editPhotoUpload.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                const base64 = ev.target.result;
-                setCVPhoto(base64);
-                editPhotoPreview.src = base64;
-                editPhotoPreview.style.display = 'block';
-                editPhotoUrl.value = '';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // URL input
-    editPhotoUrl.addEventListener('input', function () {
-        const url = editPhotoUrl.value.trim();
-        if (url) {
-            setCVPhoto(url);
-            editPhotoPreview.src = url;
-            editPhotoPreview.style.display = 'block';
-        } else {
-            editPhotoPreview.style.display = 'none';
-        }
-    });
 
     // ===== Update CV from inputs =====
     function updateCV() {
@@ -670,14 +532,6 @@
             editBlood.value = displayBlood.innerText;
             editMobile.value = displayMobile.innerText;
             editEducation.value = displayEducation.innerText;
-
-            if (currentPhotoSrc) {
-                editPhotoPreview.src = currentPhotoSrc;
-                editPhotoPreview.style.display = 'block';
-                if (currentPhotoSrc.startsWith('http')) {
-                    editPhotoUrl.value = currentPhotoSrc;
-                }
-            }
         }
     });
 
